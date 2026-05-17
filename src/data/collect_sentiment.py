@@ -24,11 +24,15 @@ from src.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-# Public historical mirror of CNN's stock Fear & Greed Index.
-# License: MIT. Updated daily by a community scraper.
+# Primary source: CNN stock Fear & Greed Index (no official API; we try a
+# community mirror).
 FEAR_GREED_URL = (
     "https://raw.githubusercontent.com/hackertarget/fear-and-greed-index/master/fear-and-greed.csv"
 )
+# Fallback: alternative.me crypto Fear & Greed. Not stock-specific, but a
+# documented public API returning a long history. Useful as a risk-on/off
+# proxy when the CNN mirror is unreachable.
+FEAR_GREED_ALT_URL = "https://api.alternative.me/fng/?limit=0&format=json"
 
 
 # ---------------------------------------------------------------------------
@@ -36,43 +40,69 @@ FEAR_GREED_URL = (
 # ---------------------------------------------------------------------------
 
 
-def fetch_fear_greed(url: str = FEAR_GREED_URL) -> pd.DataFrame:
-    """Download the public CNN Fear & Greed Index CSV.
-
-    Returns a DataFrame with columns ``[value_date, release_date, value]``.
-    Returns an empty DataFrame if the source is unreachable.
-    """
-    try:
-        import requests  # transitive dep of many libs; available
-    except ImportError as e:  # pragma: no cover
-        raise RuntimeError("requests not installed") from e
-
-    try:
-        resp = requests.get(url, timeout=15)
-        resp.raise_for_status()
-    except Exception as e:  # noqa: BLE001
-        logger.warning("Fear & Greed unreachable (%s) — returning empty frame", e)
-        return pd.DataFrame(columns=["value_date", "release_date", "value"])
-
+def _fetch_cnn_fear_greed(url: str) -> pd.DataFrame:
+    """Try to fetch the CNN F&G mirror; returns empty frame on failure."""
+    import requests
+    resp = requests.get(url, timeout=15)
+    resp.raise_for_status()
     df = pd.read_csv(io.StringIO(resp.text))
-    # Schema may evolve; defensively normalise.
     date_col = next((c for c in df.columns if c.lower() in {"date", "datetime"}), None)
     value_col = next(
-        (c for c in df.columns if c.lower() in {"fear_greed", "value", "score"}),
-        None,
+        (c for c in df.columns if c.lower() in {"fear_greed", "value", "score"}), None
     )
     if not date_col or not value_col:
-        logger.warning("Unexpected F&G schema: %s", list(df.columns))
-        return pd.DataFrame(columns=["value_date", "release_date", "value"])
-
+        raise ValueError(f"Unexpected schema from CNN mirror: {list(df.columns)}")
     out = pd.DataFrame(
         {
             "value_date": pd.to_datetime(df[date_col]),
             "value": df[value_col].astype("float64"),
         }
     )
-    out["release_date"] = out["value_date"]   # published same day
+    out["release_date"] = out["value_date"]
     return out[["value_date", "release_date", "value"]].sort_values("value_date")
+
+
+def _fetch_altme_fear_greed(url: str) -> pd.DataFrame:
+    """Fallback: alternative.me crypto F&G (full history)."""
+    import requests
+    resp = requests.get(url, timeout=15)
+    resp.raise_for_status()
+    payload = resp.json()
+    if "data" not in payload:
+        raise ValueError(f"Unexpected payload: {list(payload)[:5]}")
+    rows = payload["data"]
+    out = pd.DataFrame(
+        {
+            "value_date": pd.to_datetime(
+                [int(r["timestamp"]) for r in rows], unit="s", utc=True
+            ).tz_convert(None),
+            "value": [float(r["value"]) for r in rows],
+        }
+    )
+    out["release_date"] = out["value_date"]
+    return out[["value_date", "release_date", "value"]].sort_values("value_date")
+
+
+def fetch_fear_greed(
+    url: str = FEAR_GREED_URL,
+    fallback_url: str = FEAR_GREED_ALT_URL,
+) -> pd.DataFrame:
+    """Try CNN mirror first, then alternative.me crypto F&G as fallback.
+
+    Returns an empty DataFrame if both sources are unreachable.
+    """
+    for fetch, src_url, label in [
+        (_fetch_cnn_fear_greed, url, "CNN mirror"),
+        (_fetch_altme_fear_greed, fallback_url, "alternative.me (crypto F&G)"),
+    ]:
+        try:
+            df = fetch(src_url)
+            logger.info("Fear & Greed fetched from %s (%d rows)", label, len(df))
+            return df
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Fear & Greed %s failed: %s", label, e)
+    logger.warning("All Fear & Greed sources unreachable — returning empty frame")
+    return pd.DataFrame(columns=["value_date", "release_date", "value"])
 
 
 # ---------------------------------------------------------------------------
