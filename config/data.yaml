@@ -1,0 +1,70 @@
+# -----------------------------------------------------------------------------
+# Data sources & collection configuration
+# Filled in Phase 1. Phase 0: structure only.
+# -----------------------------------------------------------------------------
+
+ohlcv:
+  symbol: XAUUSD
+  timeframe: H1
+  raw_path: data/raw/XAUUSD_H1.csv
+  parquet_path: data/interim/xauusd_h1.parquet
+  # Period covered by the raw file (to be validated at load time)
+  start_date: "2009-03-17"
+  end_date: "2026-04-10"
+  timezone: UTC          # to confirm with user; many MT5 feeds are broker-local
+
+macro:
+  # All series fetched with FRED API where possible, fallback yfinance.
+  # Each entry MUST eventually carry a release_date column for anti-leakage.
+  sources:
+    dxy:
+      provider: yfinance
+      ticker: "DX-Y.NYB"
+      frequency: daily
+    us10y_yield:
+      provider: fred
+      series_id: "DGS10"
+      frequency: daily
+    vix:
+      provider: yfinance
+      ticker: "^VIX"
+      frequency: daily
+    fed_funds:
+      provider: fred
+      series_id: "DFF"
+      frequency: daily
+    cpi_yoy:
+      provider: fred
+      series_id: "CPIAUCSL"
+      frequency: monthly
+      release_lag_days: 14   # CPI for month M published mid-(M+1)
+    real_rate_10y:
+      provider: fred
+      series_id: "DFII10"
+      frequency: daily
+    brent_oil:
+      provider: yfinance
+      ticker: "BZ=F"
+      frequency: daily
+    spx500:
+      provider: yfinance
+      ticker: "^GSPC"
+      frequency: daily
+
+sentiment:
+  fear_greed:
+    provider: cnn_alt   # historical scraped (e.g. alternative.me for crypto fear&greed; for stocks: manual)
+    frequency: daily
+  google_trends:
+    provider: pytrends
+    keywords: ["gold price", "buy gold"]
+    geo: ""           # worldwide
+    frequency: weekly  # pytrends 5y returns weekly; will be forward-filled
+  news:
+    provider: newsapi
+    enabled: false   # optional, off by default (limited free tier)
+
+alignment:
+  target_frequency: H1
+  fill_method: forward   # forward-fill ONLY (no future leakage)
+  use_release_dates: true

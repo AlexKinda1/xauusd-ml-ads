@@ -1,0 +1,22 @@
+# FinCast — finance-specialized TSFM.
+# NOTE: install instructions and exact API to be confirmed in Phase 4.
+name: fincast
+family: tsfm
+input_format: sequence
+pretrained_model: TBD   # to confirm with official FinCast repo at Phase 4
+
+zero_shot:
+  num_samples: 20
+
+fine_tuning:
+  enabled: true
+  method: lora
+  lora:
+    r: 16
+    alpha: 32
+    dropout: 0.1
+  training:
+    batch_size: 16
+    epochs: 5
+    learning_rate: 1e-4
+    weight_decay: 0.01

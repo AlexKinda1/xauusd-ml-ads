@@ -1,0 +1,34 @@
+# XGBoost — defaults; Optuna will override during tuning.
+name: xgboost
+family: tree
+input_format: tabular   # uses lookback-aggregated features (mean, std, last, ...)
+
+regression:
+  objective: reg:squarederror
+  n_estimators: 500
+  max_depth: 6
+  learning_rate: 0.05
+  subsample: 0.8
+  colsample_bytree: 0.8
+  reg_alpha: 0.0
+  reg_lambda: 1.0
+  early_stopping_rounds: 50
+
+classification:
+  objective: multi:softprob
+  num_class: 3
+  n_estimators: 500
+  max_depth: 6
+  learning_rate: 0.05
+  subsample: 0.8
+  colsample_bytree: 0.8
+  early_stopping_rounds: 50
+
+optuna:
+  search_space:
+    max_depth: [3, 10]
+    learning_rate: [0.01, 0.3, "log"]
+    subsample: [0.5, 1.0]
+    colsample_bytree: [0.5, 1.0]
+    reg_alpha: [1e-3, 10.0, "log"]
+    reg_lambda: [1e-3, 10.0, "log"]
