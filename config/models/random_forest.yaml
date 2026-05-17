@@ -1,0 +1,27 @@
+name: random_forest
+family: tree
+input_format: tabular
+
+regression:
+  n_estimators: 500
+  max_depth: null
+  min_samples_split: 5
+  min_samples_leaf: 2
+  max_features: sqrt
+  n_jobs: -1
+
+classification:
+  n_estimators: 500
+  max_depth: null
+  min_samples_split: 5
+  min_samples_leaf: 2
+  max_features: sqrt
+  class_weight: balanced
+  n_jobs: -1
+
+optuna:
+  search_space:
+    n_estimators: [200, 1000]
+    max_depth: [5, 30]
+    min_samples_split: [2, 20]
+    min_samples_leaf: [1, 10]

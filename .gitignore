@@ -1,0 +1,91 @@
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ---------- Virtual envs ----------
+.venv/
+venv/
+env/
+ENV/
+
+# ---------- Poetry ----------
+# Lock file is committed on purpose for reproducibility.
+# poetry.lock  # (NOT ignored)
+
+# ---------- Jupyter ----------
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ---------- IDE ----------
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# ---------- Testing / Coverage ----------
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+
+# ---------- Env / secrets ----------
+.env
+.env.local
+*.pem
+*.key
+
+# ---------- Data (raw / intermediate / processed) ----------
+# Raw OHLCV CSVs, parquet files, downloaded macro & sentiment data
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/external/*
+!data/external/.gitkeep
+
+# ---------- Models / artefacts ----------
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.onnx
+*.h5
+*.ckpt
+mlruns/
+mlartifacts/
+optuna_studies/
+
+# ---------- Reports (figures generated) ----------
+reports/figures/*
+!reports/figures/.gitkeep
+reports/tables/*
+!reports/tables/.gitkeep
+
+# ---------- Logs ----------
+logs/
+*.log

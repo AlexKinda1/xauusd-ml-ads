@@ -1,0 +1,27 @@
+# Amazon Chronos — Time Series Foundation Model.
+# Evaluated FIRST zero-shot, THEN fine-tuned (LoRA if GPU constrained).
+name: chronos
+family: tsfm
+input_format: sequence
+pretrained_model: amazon/chronos-t5-small   # options: tiny / mini / small / base / large
+
+zero_shot:
+  num_samples: 20         # for probabilistic forecast
+  temperature: 1.0
+  top_k: 50
+  top_p: 1.0
+
+fine_tuning:
+  enabled: true
+  method: lora            # lora | full
+  lora:
+    r: 16
+    alpha: 32
+    dropout: 0.1
+    target_modules: ["q", "v"]
+  training:
+    batch_size: 16
+    epochs: 5
+    learning_rate: 1e-4
+    weight_decay: 0.01
+    warmup_ratio: 0.1

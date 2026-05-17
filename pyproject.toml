@@ -1,0 +1,117 @@
+[tool.poetry]
+name = "xauusd-ml-ads"
+version = "0.1.0"
+description = "XAU/USD price prediction with ML / DL — ADS project, CESI Engineering School"
+authors = ["Benjamin Alex KINDA"]
+readme = "README.md"
+license = "MIT"
+packages = [{ include = "src" }]
+
+# ----------------------------------------------------------------------------
+# Runtime dependencies
+# ----------------------------------------------------------------------------
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+
+# Core scientific stack
+# numpy pinned <2.0 for compatibility with pandas-ta and several TA / TS libs
+numpy = "<2.0"
+pandas = "^2.2"
+polars = "^1.5"
+scipy = "^1.13"
+pyarrow = "^17.0"      # parquet I/O
+python-dotenv = "^1.0"
+pyyaml = "^6.0"
+tqdm = "^4.66"
+
+# Data acquisition (financial / macro / sentiment)
+yfinance = "^0.2.40"
+fredapi = "^0.5"
+pytrends = "^4.9"
+
+# Feature engineering
+pandas-ta = "^0.3.14b0"  # technical indicators, pure-pandas (portable)
+
+# Classical ML
+scikit-learn = "^1.5"
+xgboost = "^2.1"
+statsmodels = "^0.14"   # ARIMA baseline
+
+# Deep learning
+# Torch is installed CPU-only by default. For CUDA, override locally:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+torch = "^2.4"
+transformers = "^4.44"  # Chronos (HuggingFace)
+
+# Tuning & tracking
+optuna = "^3.6"
+mlflow = "^2.16"
+
+# Visualisation
+matplotlib = "^3.9"
+seaborn = "^0.13"
+plotly = "^5.23"
+
+# Interpretability
+shap = "^0.46"
+
+# ----------------------------------------------------------------------------
+# Dev / test / quality
+# ----------------------------------------------------------------------------
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3"
+pytest-cov = "^5.0"
+pytest-xdist = "^3.6"
+ruff = "^0.6"
+black = "^24.8"
+mypy = "^1.11"
+ipykernel = "^6.29"
+jupyterlab = "^4.2"
+
+# ----------------------------------------------------------------------------
+# Build system
+# ----------------------------------------------------------------------------
+[build-system]
+requires = ["poetry-core>=1.8"]
+build-backend = "poetry.core.masonry.api"
+
+# ----------------------------------------------------------------------------
+# Tooling configuration
+# ----------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["notebooks", "data", "mlruns"]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",   # pycodestyle / pyflakes
+    "I",             # isort
+    "B",             # bugbear
+    "UP",            # pyupgrade
+    "SIM",           # simplify
+    "RUF",           # ruff-specific
+]
+ignore = ["E501"]    # line length handled by formatter
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+exclude = ["notebooks/", "data/", "build/", "dist/"]
+
+[[tool.mypy.overrides]]
+module = ["tests.*", "scripts.*"]
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --cov=src --cov-report=term-missing"
+markers = [
+    "slow: marks tests as slow (skipped by default with -m 'not slow')",
+    "leakage: anti-leakage tests (must always pass)",
+]

@@ -1,0 +1,60 @@
+# -----------------------------------------------------------------------------
+# Training, splits, validation, reproducibility
+# Values are FROZEN per the project specification.
+# -----------------------------------------------------------------------------
+
+task:
+  horizon: 24          # h: predict 24 H1 candles ahead (24h)
+  lookback: 168        # L: 1 week of H1 (7 * 24)
+  regression_target: log_return
+  classification_target: ternary_sign
+  neutral_threshold_factor: 0.5   # threshold = factor * realized_vol_24h
+
+splits:
+  method: chronological
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+  embargo_bars: 24     # gap between train/val and val/test (>= horizon)
+
+walk_forward:
+  enabled: true
+  n_folds: 5
+  embargo_bars: 24
+  expanding: true       # expanding window (vs sliding)
+
+reproducibility:
+  seeds: [42, 123, 456, 789, 2024]   # 5 seeds per DL model
+  deterministic_torch: true          # cudnn.deterministic = True
+  num_workers_dataloader: 0          # 0 for reproducibility
+
+scaling:
+  method: standard      # StandardScaler; fit on TRAIN only
+  per_feature: true
+
+mlflow:
+  experiment_name: xauusd-ml-ads
+  tracking_uri: ./mlruns
+  log_artifacts: true
+  log_predictions: true
+
+tuning:
+  framework: optuna
+  n_trials_default: 50
+  pruner: median
+  sampler: tpe
+
+metrics:
+  regression:
+    primary: rmse
+    secondary: [mae, r2, directional_accuracy, pearson, spearman]
+  classification:
+    primary: f1_macro
+    secondary: [accuracy, mcc, roc_auc_ovr, precision_macro, recall_macro]
+
+statistical_tests:
+  diebold_mariano:
+    h: 24
+    loss: squared
+  mcnemar:
+    continuity_correction: true

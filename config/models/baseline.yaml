@@ -1,0 +1,17 @@
+# Naive + ARIMA baselines.
+name: baseline
+family: statistical
+input_format: univariate
+
+naive:
+  # Forecast = last observed value (regression) or last sign (classification)
+  variant: last_value
+
+arima:
+  # (p, d, q) — small grid; final order chosen by AIC on train.
+  p_max: 5
+  d_max: 2
+  q_max: 5
+  seasonal: false
+  # ARIMA on H1 with 5 years => ~43k points; we may sub-sample for fit speed.
+  refit_every: 168  # refit weekly in walk-forward
