@@ -1,0 +1,116 @@
+{
+  "naive_zero_regression": {
+    "metrics": {
+      "train": {
+        "rmse": 0.010012794887312992,
+        "mae": 0.0071564866095432545,
+        "r2": -0.000578988666978919,
+        "directional_accuracy": 0.0005086973109694922,
+        "pearson": NaN,
+        "spearman": NaN
+      },
+      "val": {
+        "rmse": 0.009142062560790356,
+        "mae": 0.00682935635295469,
+        "r2": -2.7807912768684773e-05,
+        "directional_accuracy": 6.602403274792024e-05,
+        "pearson": NaN,
+        "spearman": NaN
+      },
+      "test": {
+        "rmse": 0.012740761267554081,
+        "mae": 0.008686214380616553,
+        "r2": -0.012785755593721637,
+        "directional_accuracy": 0.0,
+        "pearson": NaN,
+        "spearman": NaN
+      }
+    },
+    "model_path": "data/processed/models/naive_zero_regression.pkl",
+    "mlflow_run_id": "8d37adf94e5c4d06b810938661ddd7b2"
+  },
+  "ar_regression": {
+    "metrics": {
+      "train": {
+        "rmse": 0.010009937523982571,
+        "mae": 0.007147983909916845,
+        "r2": -7.997289862560208e-06,
+        "directional_accuracy": 0.5241843179923413,
+        "pearson": -0.00862741906055974,
+        "spearman": -0.001703827788050235
+      },
+      "val": {
+        "rmse": 0.009143847721291882,
+        "mae": 0.006828640810398872,
+        "r2": -0.00041839470415228064,
+        "directional_accuracy": 0.5079228839297504,
+        "pearson": 0.006276524119376136,
+        "spearman": 0.004868717191908464
+      },
+      "test": {
+        "rmse": 0.012716452047215217,
+        "mae": 0.008656672970496394,
+        "r2": -0.008924676305181789,
+        "directional_accuracy": 0.5679672542417641,
+        "pearson": -0.013625494813018368,
+        "spearman": -0.00874256929610393
+      }
+    },
+    "model_path": "data/processed/models/ar_regression.pkl",
+    "mlflow_run_id": "03dbe468f31c420b871cfcf47985f3b2"
+  },
+  "majority_classification": {
+    "metrics": {
+      "train": {
+        "accuracy": 0.3991860843024488,
+        "f1_macro": 0.19019918736134814,
+        "mcc": 0.0,
+        "precision_macro": 0.13306202810081627,
+        "recall_macro": 0.3333333333333333
+      },
+      "val": {
+        "accuracy": 0.41080153175755973,
+        "f1_macro": 0.19412205166604268,
+        "mcc": 0.0,
+        "precision_macro": 0.1369338439191866,
+        "recall_macro": 0.3333333333333333
+      },
+      "test": {
+        "accuracy": 0.38542285601109133,
+        "f1_macro": 0.185465808911127,
+        "mcc": 0.0,
+        "precision_macro": 0.12847428533703045,
+        "recall_macro": 0.3333333333333333
+      }
+    },
+    "model_path": "data/processed/models/majority_classification.pkl",
+    "mlflow_run_id": "98e5c493580f4073afebfe66c4344883"
+  },
+  "ar_classification": {
+    "metrics": {
+      "train": {
+        "accuracy": 0.3991860843024488,
+        "f1_macro": 0.19019918736134814,
+        "mcc": 0.0,
+        "precision_macro": 0.13306202810081627,
+        "recall_macro": 0.3333333333333333
+      },
+      "val": {
+        "accuracy": 0.41080153175755973,
+        "f1_macro": 0.19412205166604268,
+        "mcc": 0.0,
+        "precision_macro": 0.1369338439191866,
+        "recall_macro": 0.3333333333333333
+      },
+      "test": {
+        "accuracy": 0.38542285601109133,
+        "f1_macro": 0.185465808911127,
+        "mcc": 0.0,
+        "precision_macro": 0.12847428533703045,
+        "recall_macro": 0.3333333333333333
+      }
+    },
+    "model_path": "data/processed/models/ar_classification.pkl",
+    "mlflow_run_id": "2d7c15a3a6374762984cb3e8d5cd6374"
+  }
+}
