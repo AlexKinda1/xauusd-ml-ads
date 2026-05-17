@@ -75,9 +75,14 @@ def align_to_h1(
         ext[release_col] = ext[release_col].dt.tz_localize(h1_index.tz)
     else:
         ext[release_col] = ext[release_col].dt.tz_convert(h1_index.tz)
+    # Harmonise datetime precision. The XAU/USD index from the CSV is
+    # datetime64[us, UTC] while Parquet round-trips often return
+    # datetime64[ms, UTC]; merge_asof refuses to join across precisions.
+    ext[release_col] = ext[release_col].astype("datetime64[ns, UTC]")
+    target_index = h1_index.astype("datetime64[ns, UTC]")
 
     ext = ext.sort_values(release_col)
-    left = pd.DataFrame({"_t": h1_index}).sort_values("_t")
+    left = pd.DataFrame({"_t": target_index}).sort_values("_t")
 
     merged = pd.merge_asof(
         left,
