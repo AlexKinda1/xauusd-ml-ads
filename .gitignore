@@ -67,7 +67,8 @@ data/processed/*
 !data/processed/.gitkeep
 data/external/*
 !data/external/.gitkeep
-!data/external/*.parquet     # macro + sentiment data, intentionally tracked
+# Macro + sentiment data, intentionally tracked.
+!data/external/*.parquet
 
 # ---------- Models / artefacts ----------
 *.pkl
