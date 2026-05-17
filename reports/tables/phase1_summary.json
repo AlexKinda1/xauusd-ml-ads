@@ -9,10 +9,21 @@
     "price_max": 5596.805,
     "median_h1_return_pct": 0.08227371862693511
   },
-  "external_sources": [],
+  "external_sources": [
+    "brent_oil",
+    "cpi_yoy",
+    "dxy",
+    "fed_funds",
+    "real_rate_10y",
+    "spx500",
+    "us10y_yield",
+    "vix",
+    "fear_greed",
+    "google_trends"
+  ],
   "aligned_shape": [
     101334,
-    5
+    15
   ],
   "aligned_path": "/home/user/xauusd-ml-ads/data/processed/dataset_aligned.parquet"
 }

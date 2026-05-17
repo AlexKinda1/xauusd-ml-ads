@@ -61,7 +61,14 @@ def build_macro_features(
         DataFrame with one column per macro-derived feature, indexed on
         ``aligned.index``. Empty if no macro columns are present.
     """
-    macro_cols = [c for c in aligned.columns if c not in {"open", "high", "low", "close", "volume"}]
+    # Exclude OHLCV and sentiment-prefixed columns (sentiment is handled by
+    # src.features.sentiment to avoid feature duplication).
+    from src.features.sentiment import SENTIMENT_PREFIXES
+    excluded = {"open", "high", "low", "close", "volume"}
+    macro_cols = [
+        c for c in aligned.columns
+        if c not in excluded and not c.startswith(SENTIMENT_PREFIXES)
+    ]
     if not macro_cols:
         return pd.DataFrame(index=aligned.index)
 

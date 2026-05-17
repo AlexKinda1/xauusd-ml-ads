@@ -74,13 +74,24 @@ def _fetch_fred(series_id: str, api_key: str | None = None) -> pd.Series:
 
 
 def _fetch_yfinance(ticker: str) -> pd.Series:
-    """Fetch the daily Close of a yfinance ticker."""
+    """Fetch the daily Close of a yfinance ticker over the full available history.
+
+    Recent yfinance releases default to ``period="1mo"`` when neither ``period``
+    nor ``start``/``end`` are passed, which would silently truncate every series
+    to the last month. We force ``period="max"`` to get the full history.
+    """
     try:
         import yfinance as yf  # type: ignore
     except ImportError as e:
         raise RuntimeError("yfinance not installed; run `poetry install`") from e
 
-    data = yf.download(ticker, progress=False, auto_adjust=False, threads=False)
+    data = yf.download(
+        ticker,
+        period="max",
+        progress=False,
+        auto_adjust=False,
+        threads=False,
+    )
     if data.empty:
         raise RuntimeError(f"yfinance returned no data for {ticker}")
     # Multi-ticker DataFrames have MultiIndex columns; reduce.
