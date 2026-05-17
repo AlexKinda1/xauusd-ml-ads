@@ -85,6 +85,8 @@ reports/figures/*
 !reports/figures/.gitkeep
 reports/tables/*
 !reports/tables/.gitkeep
+!reports/tables/*.csv
+!reports/tables/*.json
 
 # ---------- Logs ----------
 logs/

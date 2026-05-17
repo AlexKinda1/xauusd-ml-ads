@@ -6,7 +6,9 @@
 ohlcv:
   symbol: XAUUSD
   timeframe: H1
-  raw_path: data/raw/XAUUSD_H1.csv
+  # CSV currently at repo root (initial commit by the user). Move to
+  # data/raw/XAUUSD_H1.csv in a future commit for tidier layout.
+  raw_path: XAUUSD_H1.csv
   parquet_path: data/interim/xauusd_h1.parquet
   # Period covered by the raw file (to be validated at load time)
   start_date: "2009-03-17"

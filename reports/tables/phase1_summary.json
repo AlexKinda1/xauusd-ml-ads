@@ -1,0 +1,18 @@
+{
+  "ohlcv": {
+    "n_rows": 101334,
+    "start": "2009-03-17 18:00:00+00:00",
+    "end": "2026-04-10 16:00:00+00:00",
+    "span_years": 17.06,
+    "n_unique_days": 5302,
+    "price_min": 861.0,
+    "price_max": 5596.805,
+    "median_h1_return_pct": 0.08227371862693511
+  },
+  "external_sources": [],
+  "aligned_shape": [
+    101334,
+    5
+  ],
+  "aligned_path": "/home/user/xauusd-ml-ads/data/processed/dataset_aligned.parquet"
+}
