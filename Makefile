@@ -50,7 +50,12 @@ features:  ## Phase 2: build features + targets
 	$(POETRY) run python scripts/02_build_features.py
 
 train-all:  ## Phase 4: train all 7 models on both tasks
-	$(POETRY) run python scripts/03_train_model.py --model all
+	$(POETRY) run python scripts/03_build_splits.py
+	$(POETRY) run python scripts/04a_train_baseline.py
+	$(POETRY) run python scripts/04b_train_xgboost.py
+
+mlflow-ui:  ## Open MLflow tracking UI on http://localhost:5000
+	$(POETRY) run mlflow ui --backend-store-uri ./mlruns
 
 evaluate:  ## Phase 5: evaluate and compare all models
 	$(POETRY) run python scripts/04_evaluate_all.py
