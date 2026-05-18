@@ -98,6 +98,21 @@ def _make_visualisations(
                 out=FIG_DIR / "xgb_clf_prob_by_true_class.png",
                 title="XGBoost classification — predicted P() by true class",
             )
+            paths["classification_report"] = vz.classification_report_heatmap(
+                y_true, y_pred,
+                out=FIG_DIR / "xgb_clf_report.png",
+                title="XGBoost classification — report (test)",
+            )
+            paths["roc"] = vz.roc_curves(
+                y_true, proba,
+                out=FIG_DIR / "xgb_clf_roc.png",
+                title="XGBoost — ROC (one-vs-rest, test)",
+            )
+            paths["pr"] = vz.precision_recall_curves(
+                y_true, proba,
+                out=FIG_DIR / "xgb_clf_pr.png",
+                title="XGBoost — Precision-Recall (test)",
+            )
 
     return paths
 
@@ -137,6 +152,17 @@ def _train_one(task: str, target_col: str, feature_cols: list[str],
         importances=model.feature_importances_,
         target_col=target_col,
     )
+
+    # Train-vs-val loss curve over boosting rounds (uses evals_result_).
+    try:
+        history = model.booster_.evals_result()
+        vis_paths["loss_curve"] = vz.learning_curve_iterations(
+            history,
+            out=FIG_DIR / f"xgb_{task}_loss_curve.png",
+            title=f"XGBoost {task} — train vs val loss across rounds",
+        )
+    except Exception as e:  # noqa: BLE001
+        logger.warning("Loss curve not generated: %s", e)
 
     return {
         "best_params": best_params,

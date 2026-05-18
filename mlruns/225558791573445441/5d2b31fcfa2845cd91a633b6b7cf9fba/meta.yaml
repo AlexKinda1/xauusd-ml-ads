@@ -1,0 +1,14 @@
+artifact_uri: file:///home/user/xauusd-ml-ads/mlruns/225558791573445441/5d2b31fcfa2845cd91a633b6b7cf9fba/artifacts
+end_time: 1779062402290
+entry_point_name: ''
+experiment_id: '225558791573445441'
+lifecycle_stage: active
+run_id: 5d2b31fcfa2845cd91a633b6b7cf9fba
+run_name: xgboost_regression
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1779062400596
+status: 3
+tags: []
+user_id: root

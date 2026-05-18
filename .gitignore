@@ -71,15 +71,15 @@ data/external/*
 !data/external/*.parquet
 
 # ---------- Models / artefacts ----------
-*.pkl
-*.joblib
+# .pkl / .joblib and MLflow tracking are intentionally tracked so the user
+# does not need to re-run the entire pipeline after a clone.
+# Large DL checkpoints (.pt / .pth / .ckpt / .h5 / .onnx) stay ignored to
+# keep the repo size manageable — they are regenerable from training.
 *.pt
 *.pth
 *.onnx
 *.h5
 *.ckpt
-mlruns/
-mlartifacts/
 optuna_studies/
 
 # ---------- Reports (figures generated) ----------

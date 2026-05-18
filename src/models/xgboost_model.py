@@ -73,11 +73,12 @@ class XGBoostRegressor(ModelBase):
 
     def fit(self, X_train, y_train, X_val=None, y_val=None) -> "XGBoostRegressor":
         Xt = _to_X(X_train, self.feature_cols)
-        eval_set = []
+        # Always evaluate against train so we can plot the train-vs-val loss curve.
+        eval_set = [(Xt, y_train)]
         if X_val is not None and y_val is not None:
-            eval_set = [(_to_X(X_val, self.feature_cols), y_val)]
+            eval_set.append((_to_X(X_val, self.feature_cols), y_val))
         self.booster_ = xgb.XGBRegressor(**self.model_params)
-        self.booster_.fit(Xt, y_train, eval_set=eval_set or None, verbose=False)
+        self.booster_.fit(Xt, y_train, eval_set=eval_set, verbose=False)
         return self
 
     def predict(self, X) -> np.ndarray:
@@ -160,11 +161,11 @@ class XGBoostClassifier(ModelBase):
     def fit(self, X_train, y_train, X_val=None, y_val=None) -> "XGBoostClassifier":
         Xt = _to_X(X_train, self.feature_cols)
         yt = self._encode(np.asarray(y_train))
-        eval_set = []
+        eval_set = [(Xt, yt)]
         if X_val is not None and y_val is not None:
-            eval_set = [(_to_X(X_val, self.feature_cols), self._encode(np.asarray(y_val)))]
+            eval_set.append((_to_X(X_val, self.feature_cols), self._encode(np.asarray(y_val))))
         self.booster_ = xgb.XGBClassifier(**self.model_params)
-        self.booster_.fit(Xt, yt, eval_set=eval_set or None, verbose=False)
+        self.booster_.fit(Xt, yt, eval_set=eval_set, verbose=False)
         return self
 
     def predict(self, X) -> np.ndarray:

@@ -133,6 +133,147 @@ def monthly_directional_accuracy(
     return out
 
 
+def classification_report_heatmap(
+    y_true: np.ndarray, y_pred: np.ndarray, out: Path, title: str
+) -> Path:
+    """Heatmap of sklearn's per-class precision / recall / F1 / support."""
+    from sklearn.metrics import classification_report
+
+    mask = ~(np.isnan(y_true.astype("float64")) | np.isnan(y_pred.astype("float64")))
+    rpt = classification_report(
+        y_true[mask].astype(int), y_pred[mask].astype(int),
+        labels=list(CLASS_LABELS), output_dict=True, zero_division=0,
+    )
+    rows = [str(c) for c in CLASS_LABELS] + ["macro avg", "weighted avg"]
+    cols = ["precision", "recall", "f1-score", "support"]
+    data = np.array([[rpt[r][c] for c in cols] for r in rows], dtype="float64")
+    # Normalise support so it shares the colour scale; show raw in annot.
+    fig, ax = plt.subplots(figsize=(7, 0.6 * len(rows) + 1))
+    norm = data.copy()
+    norm[:, -1] = norm[:, -1] / max(norm[:, -1].max(), 1.0)
+    annot = np.array([[f"{data[i, j]:.0f}" if j == 3 else f"{data[i, j]:.3f}"
+                       for j in range(4)] for i in range(len(rows))])
+    sns.heatmap(norm, annot=annot, fmt="", cmap="Blues", ax=ax,
+                xticklabels=cols, yticklabels=rows, cbar=False, vmin=0, vmax=1)
+    ax.set_title(title)
+    fig.tight_layout(); fig.savefig(out, dpi=110); plt.close(fig)
+    return out
+
+
+def roc_curves(
+    y_true: np.ndarray, proba: np.ndarray, out: Path, title: str
+) -> Path:
+    """One-vs-rest ROC curves for the 3 classes."""
+    from sklearn.metrics import roc_auc_score, roc_curve
+    mask = ~np.isnan(y_true.astype("float64"))
+    yt = y_true[mask].astype(int)
+    p = proba[mask]
+    fig, ax = plt.subplots(figsize=(6, 6))
+    colors = ["firebrick", "gray", "steelblue"]
+    for col, cls in enumerate(CLASS_LABELS):
+        y_bin = (yt == cls).astype(int)
+        if y_bin.sum() == 0 or y_bin.sum() == len(y_bin):
+            continue
+        fpr, tpr, _ = roc_curve(y_bin, p[:, col])
+        auc = roc_auc_score(y_bin, p[:, col])
+        ax.plot(fpr, tpr, color=colors[col], lw=1.5, label=f"class {cls}: AUC={auc:.3f}")
+    ax.plot([0, 1], [0, 1], "k--", lw=0.6)
+    ax.set_xlabel("False positive rate"); ax.set_ylabel("True positive rate")
+    ax.set_title(title); ax.legend(loc="lower right")
+    fig.tight_layout(); fig.savefig(out, dpi=110); plt.close(fig)
+    return out
+
+
+def precision_recall_curves(
+    y_true: np.ndarray, proba: np.ndarray, out: Path, title: str
+) -> Path:
+    """One-vs-rest Precision-Recall curves for the 3 classes."""
+    from sklearn.metrics import average_precision_score, precision_recall_curve
+    mask = ~np.isnan(y_true.astype("float64"))
+    yt = y_true[mask].astype(int)
+    p = proba[mask]
+    fig, ax = plt.subplots(figsize=(6, 6))
+    colors = ["firebrick", "gray", "steelblue"]
+    for col, cls in enumerate(CLASS_LABELS):
+        y_bin = (yt == cls).astype(int)
+        if y_bin.sum() == 0:
+            continue
+        prec, rec, _ = precision_recall_curve(y_bin, p[:, col])
+        ap = average_precision_score(y_bin, p[:, col])
+        ax.plot(rec, prec, color=colors[col], lw=1.5,
+                label=f"class {cls}: AP={ap:.3f}")
+        ax.axhline(y_bin.mean(), color=colors[col], ls=":", lw=0.5)
+    ax.set_xlabel("Recall"); ax.set_ylabel("Precision")
+    ax.set_title(title); ax.legend(loc="lower left")
+    fig.tight_layout(); fig.savefig(out, dpi=110); plt.close(fig)
+    return out
+
+
+def learning_curve_iterations(
+    history: dict[str, dict[str, list[float]]],
+    out: Path, title: str, metric_name: str | None = None,
+) -> Path:
+    """XGBoost-style train vs val metric over boosting rounds.
+
+    ``history`` follows xgb.evals_result_ format::
+
+        {"validation_0": {"rmse": [...]}, "validation_1": {"rmse": [...]}}
+
+    where validation_0 is train and validation_1 is val.
+    """
+    fig, ax = plt.subplots(figsize=(9, 4.5))
+    color = {"validation_0": "steelblue", "validation_1": "firebrick"}
+    label = {"validation_0": "train", "validation_1": "val"}
+    for eval_name, metrics in history.items():
+        if not metrics:
+            continue
+        m_key = metric_name or next(iter(metrics))
+        vals = metrics.get(m_key, [])
+        if vals:
+            ax.plot(range(1, len(vals) + 1), vals,
+                    color=color.get(eval_name, "gray"),
+                    label=f"{label.get(eval_name, eval_name)} ({m_key})", lw=1.5)
+    ax.set_xlabel("Boosting round"); ax.set_ylabel("Metric (lower = better)")
+    ax.set_title(title); ax.legend()
+    fig.tight_layout(); fig.savefig(out, dpi=110); plt.close(fig)
+    return out
+
+
+def learning_curve_data_size(
+    estimator, X_train, y_train, *, out: Path, title: str,
+    scoring: str = "neg_root_mean_squared_error",
+    cv_splits: int = 3, train_sizes=None,
+) -> Path:
+    """sklearn-style learning curve (train/val score vs training-set size).
+
+    Uses a chronological :class:`sklearn.model_selection.TimeSeriesSplit`
+    to remain anti-leakage compliant for our time-series data.
+    """
+    from sklearn.model_selection import TimeSeriesSplit, learning_curve
+    import numpy as _np
+
+    if train_sizes is None:
+        train_sizes = _np.linspace(0.2, 1.0, 6)
+
+    cv = TimeSeriesSplit(n_splits=cv_splits)
+    sizes, train_scores, val_scores = learning_curve(
+        estimator, X_train, y_train, cv=cv, scoring=scoring,
+        train_sizes=train_sizes, n_jobs=-1, shuffle=False,
+    )
+    train_mean, train_std = -train_scores.mean(axis=1), train_scores.std(axis=1)
+    val_mean, val_std = -val_scores.mean(axis=1), val_scores.std(axis=1)
+
+    fig, ax = plt.subplots(figsize=(9, 4.5))
+    ax.plot(sizes, train_mean, "o-", color="steelblue", label="train")
+    ax.fill_between(sizes, train_mean - train_std, train_mean + train_std, alpha=0.2, color="steelblue")
+    ax.plot(sizes, val_mean, "o-", color="firebrick", label="val (CV)")
+    ax.fill_between(sizes, val_mean - val_std, val_mean + val_std, alpha=0.2, color="firebrick")
+    ax.set_xlabel("Training set size"); ax.set_ylabel(f"{scoring}")
+    ax.set_title(title); ax.legend()
+    fig.tight_layout(); fig.savefig(out, dpi=110); plt.close(fig)
+    return out
+
+
 def baseline_overlay_metric(
     metrics_by_model: dict[str, dict[str, float]],
     metric_name: str,
