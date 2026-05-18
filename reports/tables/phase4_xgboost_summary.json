@@ -37,12 +37,13 @@
       }
     },
     "model_path": "data/processed/models/xgboost_regression.pkl",
-    "mlflow_run_id": "5d2b31fcfa2845cd91a633b6b7cf9fba",
+    "mlflow_run_id": "69437482fe7541ac9b54f947b909f084",
     "figures": {
       "feature_importance": "reports/figures/xgboost/xgb_regression_feature_importance.png",
       "pred_vs_actual": "reports/figures/xgboost/xgb_reg_pred_vs_actual.png",
       "residuals": "reports/figures/xgboost/xgb_reg_residuals.png",
-      "monthly_dir_acc": "reports/figures/xgboost/xgb_reg_monthly_dir_acc.png"
+      "monthly_dir_acc": "reports/figures/xgboost/xgb_reg_monthly_dir_acc.png",
+      "loss_curve": "reports/figures/xgboost/xgb_regression_loss_curve.png"
     }
   },
   "classification": {
@@ -80,11 +81,15 @@
       }
     },
     "model_path": "data/processed/models/xgboost_classification.pkl",
-    "mlflow_run_id": "ecd48256ed6c4582b3857a524da4f7d6",
+    "mlflow_run_id": "8dbbdc93b8a94434bc64334602acb548",
     "figures": {
       "feature_importance": "reports/figures/xgboost/xgb_classification_feature_importance.png",
       "confusion": "reports/figures/xgboost/xgb_clf_confusion.png",
-      "prob_by_true_class": "reports/figures/xgboost/xgb_clf_prob_by_true_class.png"
+      "prob_by_true_class": "reports/figures/xgboost/xgb_clf_prob_by_true_class.png",
+      "classification_report": "reports/figures/xgboost/xgb_clf_report.png",
+      "roc": "reports/figures/xgboost/xgb_clf_roc.png",
+      "pr": "reports/figures/xgboost/xgb_clf_pr.png",
+      "loss_curve": "reports/figures/xgboost/xgb_classification_loss_curve.png"
     }
   }
 }
