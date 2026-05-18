@@ -73,6 +73,11 @@ data/external/*
 # ---------- Models / artefacts ----------
 # .pkl / .joblib and MLflow tracking are intentionally tracked so the user
 # does not need to re-run the entire pipeline after a clone.
+#
+# Exception: Random Forest classifier with deep trees produces a >300 MB
+# pickle that exceeds GitHub's 100 MB single-file limit. Track XGBoost
+# and baseline pkls, but ignore the big RF pkl wherever it lands.
+#
 # Large DL checkpoints (.pt / .pth / .ckpt / .h5 / .onnx) stay ignored to
 # keep the repo size manageable — they are regenerable from training.
 *.pt
@@ -80,6 +85,8 @@ data/external/*
 *.onnx
 *.h5
 *.ckpt
+data/processed/models/random_forest_*.pkl
+mlruns/**/artifacts/model/random_forest_*.pkl
 optuna_studies/
 
 # ---------- Reports (figures generated) ----------
