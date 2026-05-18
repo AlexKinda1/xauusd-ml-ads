@@ -1,0 +1,14 @@
+artifact_uri: file:///home/user/xauusd-ml-ads/mlruns/225558791573445441/98e5c493580f4073afebfe66c4344883/artifacts
+end_time: 1779060984079
+entry_point_name: ''
+experiment_id: '225558791573445441'
+lifecycle_stage: active
+run_id: 98e5c493580f4073afebfe66c4344883
+run_name: majority_classification
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1779060983956
+status: 3
+tags: []
+user_id: root

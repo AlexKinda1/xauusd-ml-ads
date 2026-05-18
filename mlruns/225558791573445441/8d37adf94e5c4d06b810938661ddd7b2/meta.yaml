@@ -1,0 +1,14 @@
+artifact_uri: file:///home/user/xauusd-ml-ads/mlruns/225558791573445441/8d37adf94e5c4d06b810938661ddd7b2/artifacts
+end_time: 1779060935435
+entry_point_name: ''
+experiment_id: '225558791573445441'
+lifecycle_stage: active
+run_id: 8d37adf94e5c4d06b810938661ddd7b2
+run_name: naive_zero_regression
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1779060935374
+status: 3
+tags: []
+user_id: root

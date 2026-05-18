@@ -71,20 +71,35 @@ data/external/*
 !data/external/*.parquet
 
 # ---------- Models / artefacts ----------
-*.pkl
-*.joblib
+# .pkl / .joblib and MLflow tracking are intentionally tracked so the user
+# does not need to re-run the entire pipeline after a clone.
+#
+# Exception: Random Forest classifier with deep trees produces a >300 MB
+# pickle that exceeds GitHub's 100 MB single-file limit. Track XGBoost
+# and baseline pkls, but ignore the big RF pkl wherever it lands.
+#
+# Large DL checkpoints (.pt / .pth / .ckpt / .h5 / .onnx) stay ignored to
+# keep the repo size manageable — they are regenerable from training.
 *.pt
 *.pth
 *.onnx
 *.h5
 *.ckpt
-mlruns/
-mlartifacts/
+data/processed/models/random_forest_*.pkl
+mlruns/**/artifacts/model/random_forest_*.pkl
 optuna_studies/
 
 # ---------- Reports (figures generated) ----------
-reports/figures/*
+# Figures and tables are intentionally tracked — they are referenced from
+# the ADS report and from per-phase READMEs. The underlying datasets that
+# generated them are gitignored under data/.
+# We must un-ignore directories first so git descends into them, then
+# un-ignore the files we want.
+reports/figures/**/*
 !reports/figures/.gitkeep
+!reports/figures/*/
+!reports/figures/*.png
+!reports/figures/*/*.png
 reports/tables/*
 !reports/tables/.gitkeep
 !reports/tables/*.csv

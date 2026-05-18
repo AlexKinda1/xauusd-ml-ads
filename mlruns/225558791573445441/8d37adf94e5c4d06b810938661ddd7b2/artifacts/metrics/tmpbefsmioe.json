@@ -1,0 +1,26 @@
+{
+  "train": {
+    "rmse": 0.010012794887312992,
+    "mae": 0.0071564866095432545,
+    "r2": -0.000578988666978919,
+    "directional_accuracy": 0.0005086973109694922,
+    "pearson": NaN,
+    "spearman": NaN
+  },
+  "val": {
+    "rmse": 0.009142062560790356,
+    "mae": 0.00682935635295469,
+    "r2": -2.7807912768684773e-05,
+    "directional_accuracy": 6.602403274792024e-05,
+    "pearson": NaN,
+    "spearman": NaN
+  },
+  "test": {
+    "rmse": 0.012740761267554081,
+    "mae": 0.008686214380616553,
+    "r2": -0.012785755593721637,
+    "directional_accuracy": 0.0,
+    "pearson": NaN,
+    "spearman": NaN
+  }
+}
