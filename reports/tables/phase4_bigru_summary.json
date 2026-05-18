@@ -1,0 +1,51 @@
+{
+  "regression": {
+    "best_val_mse": 8.949338450094719e-05,
+    "n_epochs_run": 8,
+    "metrics": {
+      "train": {
+        "mse": 8.512169101783459e-05,
+        "rmse": 0.009226141718932926,
+        "mae": 0.006697050450099366,
+        "mape": 1.6311274835475535,
+        "r2": 0.14778924973460572,
+        "directional_accuracy": 0.5913146936347412,
+        "pearson": 0.4355574995255348,
+        "spearman": 0.34669460503311006,
+        "bias": -0.0005609845176180764
+      },
+      "val": {
+        "mse": 8.949338397383936e-05,
+        "rmse": 0.009460094289902155,
+        "mae": 0.007116051700183195,
+        "mape": 1.8871429885049062,
+        "r2": -0.0708154506100589,
+        "directional_accuracy": 0.4915489238082662,
+        "pearson": 0.018287204921589924,
+        "spearman": -0.014622751798525123,
+        "bias": -0.0007773996347458807
+      },
+      "test": {
+        "mse": 0.0004536837945534931,
+        "rmse": 0.021299854331743518,
+        "mae": 0.015764138881995987,
+        "mape": 9.967998694697322,
+        "r2": -1.8306103706612218,
+        "directional_accuracy": 0.44391628705354197,
+        "pearson": 0.11668640364768562,
+        "spearman": 0.021877328677371053,
+        "bias": -0.013363784971273633
+      }
+    },
+    "figures": {
+      "pred_vs_actual_scatter": "reports/figures/bigru/bigru_reg_pred_vs_actual.png",
+      "pred_vs_actual_timeseries": "reports/figures/bigru/bigru_reg_pred_vs_actual_ts.png",
+      "returns_scatter": "reports/figures/bigru/bigru_reg_returns_scatter.png",
+      "residuals_histogram": "reports/figures/bigru/bigru_reg_residuals_histogram.png",
+      "residuals_over_time": "reports/figures/bigru/bigru_reg_residuals_over_time.png",
+      "monthly_dir_acc": "reports/figures/bigru/bigru_reg_monthly_dir_acc.png",
+      "loss_curve": "reports/figures/bigru/bigru_reg_loss_curve.png"
+    },
+    "mlflow_run_id": "06f25b0eea7247c7bcccd9025f00e2ac"
+  }
+}
