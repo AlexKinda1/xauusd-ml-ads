@@ -91,19 +91,24 @@ class XGBoostRegressor(ModelBase):
 
     def save(self, path: str | Path) -> Path:
         p = Path(path); p.parent.mkdir(parents=True, exist_ok=True)
-        self.booster_.save_model(str(p.with_suffix(".json")))
-        with p.with_suffix(".meta.pkl").open("wb") as f:
-            pickle.dump({"feature_cols": self.feature_cols, "params": self.model_params}, f)
+        with p.open("wb") as f:
+            pickle.dump(
+                {
+                    "kind": "xgboost_regressor",
+                    "feature_cols": self.feature_cols,
+                    "params": self.model_params,
+                    "booster": self.booster_,   # XGBRegressor is picklable
+                },
+                f,
+            )
         return p
 
     @classmethod
     def load(cls, path: str | Path) -> "XGBoostRegressor":
-        p = Path(path)
-        with p.with_suffix(".meta.pkl").open("rb") as f:
-            meta = pickle.load(f)
-        m = cls(feature_cols=meta["feature_cols"], **meta["params"])
-        m.booster_ = xgb.XGBRegressor()
-        m.booster_.load_model(str(p.with_suffix(".json")))
+        with Path(path).open("rb") as f:
+            state = pickle.load(f)
+        m = cls(feature_cols=state["feature_cols"], **state["params"])
+        m.booster_ = state["booster"]
         return m
 
 
@@ -177,17 +182,22 @@ class XGBoostClassifier(ModelBase):
 
     def save(self, path: str | Path) -> Path:
         p = Path(path); p.parent.mkdir(parents=True, exist_ok=True)
-        self.booster_.save_model(str(p.with_suffix(".json")))
-        with p.with_suffix(".meta.pkl").open("wb") as f:
-            pickle.dump({"feature_cols": self.feature_cols, "params": self.model_params}, f)
+        with p.open("wb") as f:
+            pickle.dump(
+                {
+                    "kind": "xgboost_classifier",
+                    "feature_cols": self.feature_cols,
+                    "params": self.model_params,
+                    "booster": self.booster_,   # XGBClassifier is picklable
+                },
+                f,
+            )
         return p
 
     @classmethod
     def load(cls, path: str | Path) -> "XGBoostClassifier":
-        p = Path(path)
-        with p.with_suffix(".meta.pkl").open("rb") as f:
-            meta = pickle.load(f)
-        m = cls(feature_cols=meta["feature_cols"], **meta["params"])
-        m.booster_ = xgb.XGBClassifier()
-        m.booster_.load_model(str(p.with_suffix(".json")))
+        with Path(path).open("rb") as f:
+            state = pickle.load(f)
+        m = cls(feature_cols=state["feature_cols"], **state["params"])
+        m.booster_ = state["booster"]
         return m

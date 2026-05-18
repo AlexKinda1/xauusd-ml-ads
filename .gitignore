@@ -83,8 +83,16 @@ mlartifacts/
 optuna_studies/
 
 # ---------- Reports (figures generated) ----------
-reports/figures/*
+# Figures and tables are intentionally tracked — they are referenced from
+# the ADS report and from per-phase READMEs. The underlying datasets that
+# generated them are gitignored under data/.
+# We must un-ignore directories first so git descends into them, then
+# un-ignore the files we want.
+reports/figures/**/*
 !reports/figures/.gitkeep
+!reports/figures/*/
+!reports/figures/*.png
+!reports/figures/*/*.png
 reports/tables/*
 !reports/tables/.gitkeep
 !reports/tables/*.csv

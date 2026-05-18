@@ -1,0 +1,90 @@
+{
+  "regression": {
+    "best_params": {
+      "max_depth": 8,
+      "learning_rate": 0.02009922916483316,
+      "subsample": 0.9603593266608615,
+      "colsample_bytree": 0.6302442087247998,
+      "reg_alpha": 0.003618029763367448,
+      "reg_lambda": 1.6409232010643917,
+      "n_estimators": 438
+    },
+    "tuning_best_value": 0.009102253402173084,
+    "metrics": {
+      "train": {
+        "rmse": 0.009705679221401024,
+        "mae": 0.007005122041572518,
+        "r2": 0.05985983656271132,
+        "directional_accuracy": 0.5731746951348754,
+        "pearson": 0.5187596001038394,
+        "spearman": 0.3801356119735346
+      },
+      "val": {
+        "rmse": 0.009102253402173084,
+        "mae": 0.006809332218834825,
+        "r2": 0.00866248234922451,
+        "directional_accuracy": 0.5163739601214842,
+        "pearson": 0.09314971674182207,
+        "spearman": 0.05326029923116053
+      },
+      "test": {
+        "rmse": 0.01315874033554736,
+        "mae": 0.009254315160196131,
+        "r2": -0.08032757704362203,
+        "directional_accuracy": 0.43790849673202614,
+        "pearson": 0.0010954614626046532,
+        "spearman": -0.00542514464595611
+      }
+    },
+    "model_path": "data/processed/models/xgboost_regression.pkl",
+    "mlflow_run_id": "5d2b31fcfa2845cd91a633b6b7cf9fba",
+    "figures": {
+      "feature_importance": "reports/figures/xgboost/xgb_regression_feature_importance.png",
+      "pred_vs_actual": "reports/figures/xgboost/xgb_reg_pred_vs_actual.png",
+      "residuals": "reports/figures/xgboost/xgb_reg_residuals.png",
+      "monthly_dir_acc": "reports/figures/xgboost/xgb_reg_monthly_dir_acc.png"
+    }
+  },
+  "classification": {
+    "best_params": {
+      "max_depth": 4,
+      "learning_rate": 0.27051668818999286,
+      "subsample": 0.8875664116805573,
+      "colsample_bytree": 0.9697494707820946,
+      "reg_alpha": 3.7958531426706403,
+      "reg_lambda": 0.24637685958997463,
+      "n_estimators": 754
+    },
+    "tuning_best_value": 0.6224884050036625,
+    "metrics": {
+      "train": {
+        "accuracy": 0.5376365357713123,
+        "f1_macro": 0.5079835948377366,
+        "mcc": 0.29193372543805307,
+        "precision_macro": 0.5598715950327924,
+        "recall_macro": 0.5094440080674653
+      },
+      "val": {
+        "accuracy": 0.41773405519609136,
+        "f1_macro": 0.3775115949963375,
+        "mcc": 0.0896230494259773,
+        "precision_macro": 0.39459296331255816,
+        "recall_macro": 0.38646777591110854
+      },
+      "test": {
+        "accuracy": 0.38390440351224664,
+        "f1_macro": 0.33614943696513117,
+        "mcc": 0.0629304244202887,
+        "precision_macro": 0.36327395234847654,
+        "recall_macro": 0.3697391425681897
+      }
+    },
+    "model_path": "data/processed/models/xgboost_classification.pkl",
+    "mlflow_run_id": "ecd48256ed6c4582b3857a524da4f7d6",
+    "figures": {
+      "feature_importance": "reports/figures/xgboost/xgb_classification_feature_importance.png",
+      "confusion": "reports/figures/xgboost/xgb_clf_confusion.png",
+      "prob_by_true_class": "reports/figures/xgboost/xgb_clf_prob_by_true_class.png"
+    }
+  }
+}
