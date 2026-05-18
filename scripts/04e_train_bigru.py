@@ -108,10 +108,12 @@ def main() -> None:
                 X_tr.shape, X_va.shape, X_te.shape, n_features)
 
     model_cfg = BiGRUConfig(
-        epochs=15,
-        batch_size=256,
+        epochs=10,
+        batch_size=128,         # reduced from 256 to fit sandbox memory
+        hidden_size=64,         # reduced from 128 for the same reason
+        num_layers=1,           # reduced from 2; BiGRU = 2 directions already
         learning_rate=1e-3,
-        early_stopping_patience=4,
+        early_stopping_patience=3,
         seed=42,
     )
     model = BiGRURegressor(n_features=n_features, cfg=model_cfg)
