@@ -43,6 +43,81 @@ def predicted_vs_actual_scatter(
     return out
 
 
+def pred_vs_actual_timeseries(
+    y_true: np.ndarray, y_pred: np.ndarray, index: pd.DatetimeIndex,
+    out: Path, title: str, downsample: int = 1,
+) -> Path:
+    """Overlay y_true and y_pred as time series; helpful to spot lag / phase
+    shift between the prediction and the realisation."""
+    mask = ~(np.isnan(y_true) | np.isnan(y_pred))
+    yt, yp, idx = y_true[mask], y_pred[mask], index[mask]
+    if downsample > 1:
+        yt, yp, idx = yt[::downsample], yp[::downsample], idx[::downsample]
+    fig, ax = plt.subplots(figsize=(13, 4.5))
+    ax.plot(idx, yt, color="steelblue", lw=0.7, label="actual", alpha=0.9)
+    ax.plot(idx, yp, color="firebrick", lw=0.7, label="predicted", alpha=0.7)
+    ax.axhline(0, color="k", lw=0.4)
+    ax.set_title(title); ax.legend(loc="upper right")
+    ax.set_ylabel("log-return")
+    fig.tight_layout(); fig.savefig(out, dpi=110); plt.close(fig)
+    return out
+
+
+def residuals_over_time(
+    y_true: np.ndarray, y_pred: np.ndarray, index: pd.DatetimeIndex,
+    out: Path, title: str, downsample: int = 1,
+) -> Path:
+    """Residual (y_true - y_pred) plotted against time, with rolling mean."""
+    mask = ~(np.isnan(y_true) | np.isnan(y_pred))
+    resid = (y_true - y_pred)[mask]
+    idx = index[mask]
+    if downsample > 1:
+        resid, idx = resid[::downsample], idx[::downsample]
+    fig, ax = plt.subplots(figsize=(13, 4.5))
+    ax.plot(idx, resid, color="gray", lw=0.5, alpha=0.6, label="residual")
+    # Rolling mean (~1 week)
+    win = max(24 * 7 // max(downsample, 1), 12)
+    rolling = pd.Series(resid).rolling(win, min_periods=1).mean()
+    ax.plot(idx, rolling.values, color="firebrick", lw=1.2, label=f"rolling mean ({win} bars)")
+    ax.axhline(0, color="k", lw=0.4)
+    ax.set_title(title); ax.set_ylabel("y_true - y_pred"); ax.legend()
+    fig.tight_layout(); fig.savefig(out, dpi=110); plt.close(fig)
+    return out
+
+
+def returns_scatter(
+    y_true: np.ndarray, y_pred: np.ndarray, out: Path, title: str
+) -> Path:
+    """Scatter of (predicted, actual) log-returns with quadrant counts.
+
+    Same idea as ``predicted_vs_actual_scatter`` but explicitly highlights
+    the four sign quadrants so the reader can read off the directional
+    accuracy at a glance.
+    """
+    mask = ~(np.isnan(y_true) | np.isnan(y_pred))
+    yt, yp = y_true[mask], y_pred[mask]
+    fig, ax = plt.subplots(figsize=(6.5, 6.5))
+    colors = np.where(np.sign(yt) == np.sign(yp), "tab:green", "tab:red")
+    ax.scatter(yp, yt, s=4, alpha=0.35, c=colors)
+    lim = max(abs(yt).max(), abs(yp).max())
+    ax.plot([-lim, lim], [-lim, lim], "k--", lw=0.6)
+    ax.axhline(0, color="gray", lw=0.5); ax.axvline(0, color="gray", lw=0.5)
+    # Quadrant counts
+    q_tr_tp = int(((yp > 0) & (yt > 0)).sum())
+    q_tr_fn = int(((yp <= 0) & (yt > 0)).sum())
+    q_fp_tp = int(((yp > 0) & (yt <= 0)).sum())
+    q_fp_fn = int(((yp <= 0) & (yt <= 0)).sum())
+    ax.text(0.95, 0.95, f"++ {q_tr_tp}", ha="right", va="top", transform=ax.transAxes, color="darkgreen")
+    ax.text(0.05, 0.95, f"-+ {q_tr_fn}", ha="left", va="top", transform=ax.transAxes, color="firebrick")
+    ax.text(0.95, 0.05, f"+- {q_fp_tp}", ha="right", va="bottom", transform=ax.transAxes, color="firebrick")
+    ax.text(0.05, 0.05, f"-- {q_fp_fn}", ha="left", va="bottom", transform=ax.transAxes, color="darkgreen")
+    dir_acc = (q_tr_tp + q_fp_fn) / max(len(yt), 1)
+    ax.set_title(f"{title} (directional acc = {dir_acc:.3f})")
+    ax.set_xlabel("Predicted log-return"); ax.set_ylabel("Actual log-return")
+    fig.tight_layout(); fig.savefig(out, dpi=110); plt.close(fig)
+    return out
+
+
 def residuals_histogram(
     y_true: np.ndarray, y_pred: np.ndarray, out: Path, title: str
 ) -> Path:

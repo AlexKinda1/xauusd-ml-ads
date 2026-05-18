@@ -1,0 +1,51 @@
+{
+  "regression": {
+    "best_val_mse": 0.00011482502770452264,
+    "n_epochs_run": 6,
+    "metrics": {
+      "train": {
+        "mse": 9.554332503002204e-05,
+        "rmse": 0.00977462659286901,
+        "mae": 0.007137154851984114,
+        "mape": 2.3475145962266795,
+        "r2": 0.0434512316064557,
+        "directional_accuracy": 0.5528030367411688,
+        "pearson": 0.23980293512490974,
+        "spearman": 0.1849837965584256,
+        "bias": 3.3967939793243486e-05
+      },
+      "val": {
+        "mse": 0.0001148250276149403,
+        "rmse": 0.010715644059735295,
+        "mae": 0.008132469389510151,
+        "mape": 3.4615596968402316,
+        "r2": -0.37391624081113406,
+        "directional_accuracy": 0.4771556846692196,
+        "pearson": -0.04029540576321278,
+        "spearman": -0.052003430187757216,
+        "bias": -0.001044449889911173
+      },
+      "test": {
+        "mse": 0.0004935733030404434,
+        "rmse": 0.022216509695279395,
+        "mae": 0.015397211225323462,
+        "mape": 9.231776977989227,
+        "r2": -2.0794877997412393,
+        "directional_accuracy": 0.4414735591206179,
+        "pearson": 0.04903377657817909,
+        "spearman": -0.025637054337885143,
+        "bias": -0.012364805421271259
+      }
+    },
+    "figures": {
+      "pred_vs_actual_scatter": "reports/figures/cnn/cnn_reg_pred_vs_actual.png",
+      "pred_vs_actual_timeseries": "reports/figures/cnn/cnn_reg_pred_vs_actual_ts.png",
+      "returns_scatter": "reports/figures/cnn/cnn_reg_returns_scatter.png",
+      "residuals_histogram": "reports/figures/cnn/cnn_reg_residuals_histogram.png",
+      "residuals_over_time": "reports/figures/cnn/cnn_reg_residuals_over_time.png",
+      "monthly_dir_acc": "reports/figures/cnn/cnn_reg_monthly_dir_acc.png",
+      "loss_curve": "reports/figures/cnn/cnn_reg_loss_curve.png"
+    },
+    "mlflow_run_id": "5b24a2c19a844467bc3d1698d7649283"
+  }
+}

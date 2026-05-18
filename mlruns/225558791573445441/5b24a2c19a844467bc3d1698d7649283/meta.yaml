@@ -1,0 +1,14 @@
+artifact_uri: file:///home/user/xauusd-ml-ads/mlruns/225558791573445441/5b24a2c19a844467bc3d1698d7649283/artifacts
+end_time: 1779093018400
+entry_point_name: ''
+experiment_id: '225558791573445441'
+lifecycle_stage: active
+run_id: 5b24a2c19a844467bc3d1698d7649283
+run_name: cnn1d_regression
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1779092312259
+status: 3
+tags: []
+user_id: root

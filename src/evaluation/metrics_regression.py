@@ -19,14 +19,21 @@ def regression_metrics(y_true: np.ndarray, y_pred: np.ndarray) -> dict[str, floa
         return {k: float("nan") for k in
                 ("rmse", "mae", "r2", "directional_accuracy", "pearson", "spearman")}
 
-    rmse = float(np.sqrt(mean_squared_error(yt, yp)))
+    mse = float(mean_squared_error(yt, yp))
+    rmse = float(np.sqrt(mse))
     mae = float(mean_absolute_error(yt, yp))
+    # Mean Absolute Percentage Error — robust definition: |y_true - y_pred| / |y_true|
+    # restricted to non-zero true values to avoid blow-ups on log-return = 0.
+    nonzero = np.abs(yt) > 1e-12
+    mape = float(np.mean(np.abs((yt[nonzero] - yp[nonzero]) / yt[nonzero]))) if nonzero.any() else float("nan")
     r2 = float(r2_score(yt, yp))
     dir_acc = float(np.mean(np.sign(yt) == np.sign(yp)))
     pearson = float(stats.pearsonr(yt, yp)[0]) if yt.std() > 0 and yp.std() > 0 else float("nan")
     spearman = float(stats.spearmanr(yt, yp)[0]) if yt.std() > 0 and yp.std() > 0 else float("nan")
+    # Bias = mean residual; informative for systematic over/under-prediction.
+    bias = float(np.mean(yp - yt))
     return {
-        "rmse": rmse, "mae": mae, "r2": r2,
-        "directional_accuracy": dir_acc,
-        "pearson": pearson, "spearman": spearman,
+        "mse": mse, "rmse": rmse, "mae": mae, "mape": mape,
+        "r2": r2, "directional_accuracy": dir_acc,
+        "pearson": pearson, "spearman": spearman, "bias": bias,
     }
