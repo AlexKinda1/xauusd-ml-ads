@@ -1,0 +1,14 @@
+artifact_uri: file:///home/user/xauusd-ml-ads/mlruns/225558791573445441/daaae87fef3e4ae59b7c9f2faabab842/artifacts
+end_time: 1779064775812
+entry_point_name: ''
+experiment_id: '225558791573445441'
+lifecycle_stage: active
+run_id: daaae87fef3e4ae59b7c9f2faabab842
+run_name: random_forest_classification
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1779064719231
+status: 3
+tags: []
+user_id: root

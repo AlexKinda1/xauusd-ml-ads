@@ -1,0 +1,89 @@
+{
+  "regression": {
+    "best_params": {
+      "n_estimators": 500,
+      "max_depth": 5,
+      "min_samples_split": 15,
+      "min_samples_leaf": 4
+    },
+    "tuning_best_value": 0.009256199601881466,
+    "metrics": {
+      "train": {
+        "rmse": 0.009727953063304411,
+        "mae": 0.0070350363108150704,
+        "r2": 0.055539775822022186,
+        "directional_accuracy": 0.5477256991055406,
+        "pearson": 0.3009006966134698,
+        "spearman": 0.21347350695043119
+      },
+      "val": {
+        "rmse": 0.009256199601881466,
+        "mae": 0.006916427347626166,
+        "r2": -0.025154025214826792,
+        "directional_accuracy": 0.5093754126502047,
+        "pearson": 0.06285200523634177,
+        "spearman": 0.019910637808621456
+      },
+      "test": {
+        "rmse": 0.01771554054862687,
+        "mae": 0.01433929976460754,
+        "r2": -0.9581035060955088,
+        "directional_accuracy": 0.4364560639070443,
+        "pearson": -0.03128482821443857,
+        "spearman": -0.03501863805353809
+      }
+    },
+    "model_path": "data/processed/models/random_forest_regression.pkl",
+    "mlflow_run_id": "ecff19cdf66345f78ad222684247c736",
+    "figures": {
+      "feature_importance": "reports/figures/random_forest/rf_regression_feature_importance.png",
+      "pred_vs_actual": "reports/figures/random_forest/rf_reg_pred_vs_actual.png",
+      "residuals": "reports/figures/random_forest/rf_reg_residuals.png",
+      "monthly_dir_acc": "reports/figures/random_forest/rf_reg_monthly_dir_acc.png",
+      "learning_curve": "reports/figures/random_forest/rf_reg_learning_curve.png"
+    }
+  },
+  "classification": {
+    "best_params": {
+      "n_estimators": 500,
+      "max_depth": 25,
+      "min_samples_split": 5,
+      "min_samples_leaf": 6
+    },
+    "tuning_best_value": 0.6039782187735041,
+    "metrics": {
+      "train": {
+        "accuracy": 0.9440998177167969,
+        "f1_macro": 0.9454147147706181,
+        "mcc": 0.9153806445535598,
+        "precision_macro": 0.9445603073003678,
+        "recall_macro": 0.946346965619408
+      },
+      "val": {
+        "accuracy": 0.4125841806417536,
+        "f1_macro": 0.39602178122649595,
+        "mcc": 0.10250777469091006,
+        "precision_macro": 0.3992597716757594,
+        "recall_macro": 0.3968439816824567
+      },
+      "test": {
+        "accuracy": 0.33887898593780946,
+        "f1_macro": 0.32691854879552523,
+        "mcc": 0.040743803083573726,
+        "precision_macro": 0.35277661178402314,
+        "recall_macro": 0.3566480686336641
+      }
+    },
+    "model_path": "data/processed/models/random_forest_classification.pkl",
+    "mlflow_run_id": "daaae87fef3e4ae59b7c9f2faabab842",
+    "figures": {
+      "feature_importance": "reports/figures/random_forest/rf_classification_feature_importance.png",
+      "confusion": "reports/figures/random_forest/rf_clf_confusion.png",
+      "prob_by_true_class": "reports/figures/random_forest/rf_clf_prob_by_true_class.png",
+      "classification_report": "reports/figures/random_forest/rf_clf_report.png",
+      "roc": "reports/figures/random_forest/rf_clf_roc.png",
+      "pr": "reports/figures/random_forest/rf_clf_pr.png",
+      "learning_curve": "reports/figures/random_forest/rf_clf_learning_curve.png"
+    }
+  }
+}
