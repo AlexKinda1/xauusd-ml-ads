@@ -181,6 +181,53 @@ def run_chronos_walkforward(
     return pd.concat(chunks, axis=0)
 
 
+def run_moirai_walkforward(
+    df: pd.DataFrame, target_col: str, horizon: int,
+    initial_train_end_idx: int, fold_size: int,
+    model_id: str = "Salesforce/moirai-1.0-R-base",
+    context_length: int = 512,
+    batch_size: int = 16,
+    device: str = "cuda",
+    n_folds: int | None = None,
+) -> pd.DataFrame:
+    """MOIRAI zero-shot predictions over the same fold grid.
+
+    Symmetric to ``run_chronos_walkforward`` — uses MoiraiRegressor.
+    """
+    from src.models.moirai_model import MoiraiConfig, MoiraiRegressor
+
+    cfg = MoiraiConfig(
+        pretrained=model_id, context_length=context_length,
+        horizon=horizon, num_samples=20, batch_size=batch_size, device=device,
+    )
+    model = MoiraiRegressor(cfg=cfg)
+    model.fit(df, df[target_col].values)
+
+    chunks = []
+    fold_start = initial_train_end_idx
+    fold_idx = 0
+    while fold_start + fold_size <= len(df):
+        if n_folds is not None and fold_idx >= n_folds:
+            break
+        fold_end = fold_start + fold_size
+        fold_df = df.iloc[fold_start:fold_end]
+        logger.info("MOIRAI fold %d | %s -> %s | %d rows",
+                    fold_idx, fold_df.index[0], fold_df.index[-1], len(fold_df))
+        ctx_start = max(0, fold_start - context_length + 1)
+        sub = df.iloc[ctx_start:fold_end]
+        preds = model.predict(sub)
+        preds_for_fold = preds[-len(fold_df):]
+        chunk = pd.DataFrame(
+            {"y_true": fold_df[target_col].values, "y_pred": preds_for_fold,
+             "close": fold_df["close"].values, "fold": fold_idx},
+            index=fold_df.index,
+        )
+        chunks.append(chunk)
+        fold_start = fold_end
+        fold_idx += 1
+    return pd.concat(chunks, axis=0)
+
+
 def make_figures(preds: pd.DataFrame, model_name: str, horizon: int) -> dict[str, Path]:
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     base = FIG_DIR / f"{model_name}_h{horizon}"
@@ -245,6 +292,10 @@ def main() -> None:
                         help="Which walk-forward variants to run.")
     parser.add_argument("--skip-chronos", action="store_true")
     parser.add_argument("--skip-xgboost", action="store_true")
+    parser.add_argument("--include-moirai", action="store_true",
+                        help="Also run Salesforce MOIRAI (requires uni2ts).")
+    parser.add_argument("--moirai-model", default="Salesforce/moirai-1.0-R-base")
+    parser.add_argument("--moirai-batch", type=int, default=16)
     args = parser.parse_args()
 
     set_global_seed(42)
@@ -325,6 +376,36 @@ def main() -> None:
             logger.info("Chronos %s: %s", variant,
                         " | ".join(f"{k}={v:.4f}" for k, v in ch_metrics.items()))
             logger.info("Chronos %s Sharpe: %s", variant, ch_sharpe)
+
+        if args.include_moirai:
+            logger.info(">>> MOIRAI %s", variant)
+            if variant == "sliding_6m":
+                mo_ctx = min(args.chronos_context, SLIDING_6M_BARS)
+            elif variant == "sliding_24m":
+                mo_ctx = min(args.chronos_context, SLIDING_24M_BARS)
+            else:
+                mo_ctx = args.chronos_context
+            mo_preds = run_moirai_walkforward(
+                df, target_col, horizon=h,
+                initial_train_end_idx=initial_idx, fold_size=args.fold_size,
+                model_id=args.moirai_model, context_length=mo_ctx,
+                batch_size=args.moirai_batch, device=args.device, n_folds=args.n_folds,
+            )
+            mo_preds.to_parquet(PRED_DIR / f"moirai_walkforward_h{h}_{variant}.parquet")
+            mo_metrics = regression_metrics(mo_preds["y_true"].values, mo_preds["y_pred"].values)
+            mo_sharpe = naive_sharpe(mo_preds["y_pred"].values, mo_preds["y_true"].values, h)
+            mo_figs = make_figures(mo_preds, f"moirai_wf_{variant}", h)
+            variant_summary["models"]["moirai"] = {
+                "model_id": args.moirai_model,
+                "context_length": mo_ctx,
+                "n_folds": int(mo_preds["fold"].nunique()),
+                "n_predictions": int(len(mo_preds)),
+                "metrics": mo_metrics, "sharpe": mo_sharpe,
+                "figures": {k: str(v.relative_to(PROJECT_ROOT)) for k, v in mo_figs.items()},
+            }
+            logger.info("MOIRAI %s: %s", variant,
+                        " | ".join(f"{k}={v:.4f}" for k, v in mo_metrics.items()))
+            logger.info("MOIRAI %s Sharpe: %s", variant, mo_sharpe)
 
         summary["variants"][variant] = variant_summary
 
