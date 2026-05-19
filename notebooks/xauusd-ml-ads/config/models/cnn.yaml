@@ -1,0 +1,26 @@
+name: cnn1d
+family: dl
+input_format: sequence   # [batch, lookback, n_features]
+
+architecture:
+  conv_channels: [64, 128, 128]
+  kernel_sizes: [3, 3, 3]
+  dropout: 0.3
+  fc_hidden: 128
+  activation: relu
+
+training:
+  batch_size: 64
+  epochs: 100
+  optimizer: adam
+  learning_rate: 0.001
+  weight_decay: 1e-5
+  scheduler: cosine
+  early_stopping_patience: 10
+  gradient_clip: 1.0
+
+optuna:
+  search_space:
+    learning_rate: [1e-4, 1e-2, "log"]
+    dropout: [0.1, 0.5]
+    batch_size: [32, 64, 128]

@@ -1,0 +1,10 @@
+,value
+n_rows,101334.0
+span_years,17.06
+trading_days,5302.0
+price_min_usd,861.0
+price_max_usd,5596.8
+mean_h1_logret_bp,0.1624
+std_h1_logret_bp,21.0302
+skew_h1_logret,-0.4667
+kurtosis_h1_logret,27.924
