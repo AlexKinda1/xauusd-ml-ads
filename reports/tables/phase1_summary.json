@@ -25,5 +25,5 @@
     101334,
     15
   ],
-  "aligned_path": "/home/user/xauusd-ml-ads/data/processed/dataset_aligned.parquet"
+  "aligned_path": "/content/xauusd-ml-ads/data/processed/dataset_aligned.parquet"
 }
