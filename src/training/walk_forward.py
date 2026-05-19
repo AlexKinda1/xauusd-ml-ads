@@ -39,6 +39,7 @@ def walk_forward_predictions(
     n_folds: int | None = None,
     extra_cols: list[str] | None = None,
     fit_kwargs_factory: Callable[[pd.DataFrame, pd.DataFrame], dict] | None = None,
+    train_window: int | None = None,
 ) -> pd.DataFrame:
     """Generate walk-forward predictions over a feature DataFrame.
 
@@ -56,6 +57,10 @@ def walk_forward_predictions(
             ``"close"`` for downstream Sharpe computation).
         fit_kwargs_factory: Optional ``(train_df, fold_df) -> kwargs`` for
             ``model.fit`` (e.g. to pass an X_val constructed from train tail).
+        train_window: If ``None`` (default), training is **expanding** —
+            every fold sees all data from index 0 up to its embargoed train end.
+            If an integer, training is **sliding** — each fold uses only the
+            last ``train_window`` rows ending at ``fold_start - embargo``.
 
     Returns:
         DataFrame indexed on the union of all fold windows with columns
@@ -82,8 +87,9 @@ def walk_forward_predictions(
             fold_start = fold_end
             fold_idx += 1
             continue
+        train_start = 0 if train_window is None else max(0, train_end - train_window)
 
-        train_df = df.iloc[:train_end]
+        train_df = df.iloc[train_start:train_end]
         fold_df = df.iloc[fold_start:fold_end]
 
         # Drop rows with NaN target — usually the tail or warm-up.
@@ -94,9 +100,11 @@ def walk_forward_predictions(
             fold_idx += 1
             continue
 
+        window_kind = "expanding" if train_window is None else f"sliding[{train_window}]"
         logger.info(
-            "Fold %d | train=[0:%d] (%d rows after dropna) | fold=[%d:%d] (%d rows) | %s -> %s",
-            fold_idx, train_end, len(train_clean), fold_start, fold_end, fold_df.shape[0],
+            "Fold %d (%s) | train=[%d:%d] (%d rows) | fold=[%d:%d] (%d rows) | %s -> %s",
+            fold_idx, window_kind, train_start, train_end, len(train_clean),
+            fold_start, fold_end, fold_df.shape[0],
             train_clean.index[-1], fold_df.index[0],
         )
 

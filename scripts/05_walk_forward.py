@@ -94,6 +94,7 @@ def run_xgboost_walkforward(
     df: pd.DataFrame, feature_cols: list[str], target_col: str,
     horizon: int, initial_train_end_idx: int, fold_size: int,
     n_folds: int | None = None,
+    train_window: int | None = None,
 ) -> pd.DataFrame:
     """Walk-forward XGBoost with full refit at each fold."""
     def factory() -> XGBoostRegressor:
@@ -123,6 +124,7 @@ def run_xgboost_walkforward(
         initial_train_end_idx=initial_train_end_idx,
         fold_size=fold_size, embargo=horizon, n_folds=n_folds,
         extra_cols=["close"], fit_kwargs_factory=fit_kwargs,
+        train_window=train_window,
     )
     return preds
 
@@ -212,6 +214,19 @@ def make_figures(preds: pd.DataFrame, model_name: str, horizon: int) -> dict[str
     return out
 
 
+# 24 months in H1 = 24 * 30 * 24 = 17280 ; we use trading-day approx: 252 * 24 = 6048/yr
+# Sliding 24 months = 24 * 252 * 24 / 12 = 12096 bars
+# Sliding 6  months =  6 * 252 * 24 / 12 =  3024 bars
+SLIDING_24M_BARS = 12096
+SLIDING_6M_BARS = 3024
+
+VARIANTS = {
+    "sliding_24m": SLIDING_24M_BARS,
+    "sliding_6m": SLIDING_6M_BARS,
+    "expanding": None,
+}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--horizon", type=int, default=4)
@@ -224,13 +239,18 @@ def main() -> None:
     parser.add_argument("--chronos-context", type=int, default=256)
     parser.add_argument("--chronos-batch", type=int, default=32)
     parser.add_argument("--device", default="auto")
+    parser.add_argument("--variants", nargs="+",
+                        default=["sliding_24m", "sliding_6m", "expanding"],
+                        choices=list(VARIANTS.keys()),
+                        help="Which walk-forward variants to run.")
     parser.add_argument("--skip-chronos", action="store_true")
     parser.add_argument("--skip-xgboost", action="store_true")
     args = parser.parse_args()
 
     set_global_seed(42)
     h = args.horizon
-    logger.info("=== Walk-forward experiment | horizon=%d | fold_size=%d ===", h, args.fold_size)
+    logger.info("=== Walk-forward experiment | horizon=%d | fold_size=%d | variants=%s ===",
+                h, args.fold_size, args.variants)
 
     df, feature_cols, target_col = build_dataset(h)
     logger.info("Dataset shape: %s, features: %d, target: %s",
@@ -243,51 +263,70 @@ def main() -> None:
     summary: dict = {"horizon": h, "fold_size": args.fold_size,
                      "n_features": len(feature_cols),
                      "initial_train_cutoff": str(df.index[initial_idx]),
-                     "models": {}}
+                     "variants": {}}
 
-    if not args.skip_xgboost:
-        logger.info(">>> XGBoost walk-forward")
-        xgb_preds = run_xgboost_walkforward(
-            df, feature_cols, target_col, horizon=h,
-            initial_train_end_idx=initial_idx, fold_size=args.fold_size,
-            n_folds=args.n_folds,
-        )
-        PRED_DIR.mkdir(parents=True, exist_ok=True)
-        xgb_preds.to_parquet(PRED_DIR / f"xgboost_walkforward_h{h}.parquet")
-        xgb_metrics = regression_metrics(xgb_preds["y_true"].values, xgb_preds["y_pred"].values)
-        xgb_sharpe = naive_sharpe(xgb_preds["y_pred"].values, xgb_preds["y_true"].values, h)
-        xgb_figs = make_figures(xgb_preds, "xgboost_wf", h)
-        summary["models"]["xgboost_walkforward"] = {
-            "n_folds": int(xgb_preds["fold"].nunique()),
-            "n_predictions": int(len(xgb_preds)),
-            "metrics": xgb_metrics, "sharpe": xgb_sharpe,
-            "figures": {k: str(v.relative_to(PROJECT_ROOT)) for k, v in xgb_figs.items()},
-        }
-        logger.info("XGBoost wf: %s", " | ".join(f"{k}={v:.4f}" for k, v in xgb_metrics.items()))
-        logger.info("XGBoost wf Sharpe: %s", xgb_sharpe)
+    for variant in args.variants:
+        train_window = VARIANTS[variant]
+        logger.info("\n========== variant=%s | train_window=%s ==========",
+                    variant, "expanding" if train_window is None else f"{train_window} bars")
+        variant_summary: dict = {"train_window": train_window, "models": {}}
 
-    if not args.skip_chronos:
-        logger.info(">>> Chronos walk-forward")
-        ch_preds = run_chronos_walkforward(
-            df, target_col, horizon=h,
-            initial_train_end_idx=initial_idx, fold_size=args.fold_size,
-            model_id=args.chronos_model, context_length=args.chronos_context,
-            batch_size=args.chronos_batch, device=args.device, n_folds=args.n_folds,
-        )
-        ch_preds.to_parquet(PRED_DIR / f"chronos_walkforward_h{h}.parquet")
-        ch_metrics = regression_metrics(ch_preds["y_true"].values, ch_preds["y_pred"].values)
-        ch_sharpe = naive_sharpe(ch_preds["y_pred"].values, ch_preds["y_true"].values, h)
-        ch_figs = make_figures(ch_preds, "chronos_wf", h)
-        summary["models"]["chronos_walkforward"] = {
-            "model_id": args.chronos_model,
-            "context_length": args.chronos_context,
-            "n_folds": int(ch_preds["fold"].nunique()),
-            "n_predictions": int(len(ch_preds)),
-            "metrics": ch_metrics, "sharpe": ch_sharpe,
-            "figures": {k: str(v.relative_to(PROJECT_ROOT)) for k, v in ch_figs.items()},
-        }
-        logger.info("Chronos wf: %s", " | ".join(f"{k}={v:.4f}" for k, v in ch_metrics.items()))
-        logger.info("Chronos wf Sharpe: %s", ch_sharpe)
+        if not args.skip_xgboost:
+            logger.info(">>> XGBoost %s", variant)
+            xgb_preds = run_xgboost_walkforward(
+                df, feature_cols, target_col, horizon=h,
+                initial_train_end_idx=initial_idx, fold_size=args.fold_size,
+                n_folds=args.n_folds, train_window=train_window,
+            )
+            PRED_DIR.mkdir(parents=True, exist_ok=True)
+            xgb_preds.to_parquet(PRED_DIR / f"xgboost_walkforward_h{h}_{variant}.parquet")
+            xgb_metrics = regression_metrics(xgb_preds["y_true"].values, xgb_preds["y_pred"].values)
+            xgb_sharpe = naive_sharpe(xgb_preds["y_pred"].values, xgb_preds["y_true"].values, h)
+            xgb_figs = make_figures(xgb_preds, f"xgboost_wf_{variant}", h)
+            variant_summary["models"]["xgboost"] = {
+                "n_folds": int(xgb_preds["fold"].nunique()),
+                "n_predictions": int(len(xgb_preds)),
+                "metrics": xgb_metrics, "sharpe": xgb_sharpe,
+                "figures": {k: str(v.relative_to(PROJECT_ROOT)) for k, v in xgb_figs.items()},
+            }
+            logger.info("XGBoost %s: %s", variant,
+                        " | ".join(f"{k}={v:.4f}" for k, v in xgb_metrics.items()))
+            logger.info("XGBoost %s Sharpe: %s", variant, xgb_sharpe)
+
+        if not args.skip_chronos:
+            logger.info(">>> Chronos %s", variant)
+            # Chronos is zero-shot — the "variant" only affects the CONTEXT
+            # used at each prediction. We map sliding_24m / 6m / expanding to
+            # context_length values relative to the requested cap.
+            if variant == "sliding_6m":
+                ch_ctx = min(args.chronos_context, SLIDING_6M_BARS)
+            elif variant == "sliding_24m":
+                ch_ctx = min(args.chronos_context, SLIDING_24M_BARS)
+            else:  # expanding
+                ch_ctx = args.chronos_context
+            ch_preds = run_chronos_walkforward(
+                df, target_col, horizon=h,
+                initial_train_end_idx=initial_idx, fold_size=args.fold_size,
+                model_id=args.chronos_model, context_length=ch_ctx,
+                batch_size=args.chronos_batch, device=args.device, n_folds=args.n_folds,
+            )
+            ch_preds.to_parquet(PRED_DIR / f"chronos_walkforward_h{h}_{variant}.parquet")
+            ch_metrics = regression_metrics(ch_preds["y_true"].values, ch_preds["y_pred"].values)
+            ch_sharpe = naive_sharpe(ch_preds["y_pred"].values, ch_preds["y_true"].values, h)
+            ch_figs = make_figures(ch_preds, f"chronos_wf_{variant}", h)
+            variant_summary["models"]["chronos"] = {
+                "model_id": args.chronos_model,
+                "context_length": ch_ctx,
+                "n_folds": int(ch_preds["fold"].nunique()),
+                "n_predictions": int(len(ch_preds)),
+                "metrics": ch_metrics, "sharpe": ch_sharpe,
+                "figures": {k: str(v.relative_to(PROJECT_ROOT)) for k, v in ch_figs.items()},
+            }
+            logger.info("Chronos %s: %s", variant,
+                        " | ".join(f"{k}={v:.4f}" for k, v in ch_metrics.items()))
+            logger.info("Chronos %s Sharpe: %s", variant, ch_sharpe)
+
+        summary["variants"][variant] = variant_summary
 
     out = PROJECT_ROOT / f"reports/tables/phase5_walkforward_h{h}_summary.json"
     out.parent.mkdir(parents=True, exist_ok=True)
