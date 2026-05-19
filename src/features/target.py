@@ -107,3 +107,26 @@ def build_targets(
     sigma = realized_vol_past(close, vol_window, lag=1)
     threshold = (threshold_factor * sigma * np.sqrt(horizon)).rename("y_clf_threshold")
     return pd.concat([y_reg, y_clf, threshold], axis=1)
+
+
+def build_targets_multi_horizon(
+    close: pd.Series,
+    *,
+    horizons: tuple[int, ...] = (1, 4, 24),
+    vol_window: int = 24,
+    threshold_factor: float = 0.5,
+) -> pd.DataFrame:
+    """Build regression + classification targets for several horizons at once.
+
+    Useful for walk-forward experiments where we want to compare h=4 vs h=24
+    without re-running the entire feature pipeline. Each horizon gets its own
+    columns: ``y_reg_h<h>``, ``y_clf_h<h>``, ``y_clf_threshold_h<h>``.
+    """
+    pieces: list[pd.Series | pd.DataFrame] = []
+    for h in horizons:
+        df = build_targets(close, horizon=h, vol_window=vol_window,
+                           threshold_factor=threshold_factor)
+        # Rename threshold so it doesn't collide across horizons.
+        df = df.rename(columns={"y_clf_threshold": f"y_clf_threshold_h{h}"})
+        pieces.append(df)
+    return pd.concat(pieces, axis=1)
