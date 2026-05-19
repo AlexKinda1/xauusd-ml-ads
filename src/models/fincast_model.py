@@ -1,21 +1,28 @@
-"""FinCast role — TSFM specialised in financial / mixed-domain time series.
+"""FinCast role — second TSFM data point via the larger Chronos T5 model.
 
-The original FinCast paper (Liu et al, 2025) does not currently expose a
-public HuggingFace checkpoint that we can rely on. To honour the project's
-"finance-aware foundation model" slot, we substitute **MOIRAI** from
-Salesforce (Liu et al, 2024, ICML) which is pretrained on the LOTSA
-corpus including a substantial share of financial time series. MOIRAI's
-architecture is genuinely different from Chronos:
+Background
+~~~~~~~~~~
+We initially targeted MOIRAI (Salesforce, via uni2ts) for the
+"finance-aware TSFM" slot. In practice, uni2ts hard-pins old versions
+of pandas / numpy / scipy / fsspec / torch that conflict with the rest
+of the Colab stack and break several downstream packages. We could not
+get a stable install on Colab without manual environment surgery.
 
-  - Chronos: T5 / Chronos-Bolt with scalar quantisation tokens
-  - MOIRAI : encoder-only Transformer with multi-patch tokenisation and a
-             mixed-distribution probabilistic head
+The original FinCast paper (Liu et al, 2025) does not yet expose a
+public HuggingFace checkpoint either.
 
-This means we are comparing two distinct TSFM families on XAU/USD, not
-two variants of the same one.
+To still ship a meaningful second TSFM benchmark, we evaluate
+``amazon/chronos-t5-large`` here:
 
-If a public FinCast checkpoint becomes available later, swapping is a
-one-line change via :attr:`FinCastConfig.pretrained`.
+  - Same install path as Chronos-Bolt (already proven), no extra conflict.
+  - Genuinely different architecture from Chronos-Bolt evaluated earlier:
+    T5 encoder-decoder + scalar tokens vs the distilled direct-multi-step
+    Bolt model. Chronos-T5-Large is ~710M params (3.5x larger than
+    Bolt-base ~200M).
+  - Provides a second, larger TSFM data point for the Phase-5 comparison.
+
+This is documented honestly in the run summary so the ADS report can
+mention the pivot.
 """
 
 from __future__ import annotations
@@ -36,22 +43,24 @@ logger = get_logger(__name__)
 
 @dataclass
 class FinCastConfig:
-    pretrained: str = "Salesforce/moirai-1.0-R-base"
+    # Default points at a *different* Chronos variant than the one used for
+    # the Chronos slot (which was amazon/chronos-bolt-base / -small). The
+    # T5-large checkpoint is a different architecture and 3.5x larger.
+    pretrained: str = "amazon/chronos-t5-large"
     context_length: int = 512
     horizon: int = 24
     num_samples: int = 20
-    batch_size: int = 32
+    batch_size: int = 8        # T5-large needs a smaller batch than Bolt
     device: str = "auto"
-    patch_size: int | str = "auto"   # MOIRAI auto-selects unless overridden
     seed: int = 42
 
 
 class FinCastRegressor(ModelBase):
-    """MOIRAI-based forecaster, wrapped behind the same ModelBase as Chronos.
+    """Wraps a Chronos-T5 (or any chronos-forecasting compatible) model.
 
-    The wrapper accepts a DataFrame with a ``close`` column (univariate
-    forecast), runs MOIRAI in zero-shot mode, and returns the predicted
-    24h log-return for every row in the input.
+    Same input/output contract as :class:`src.models.chronos_model.ChronosRegressor`:
+    accepts a DataFrame with a ``close`` column, returns the predicted
+    24h log-return for every row.
     """
 
     name = "fincast"
@@ -60,18 +69,18 @@ class FinCastRegressor(ModelBase):
         super().__init__(task="regression", **kwargs)
         self.cfg = cfg or FinCastConfig()
         self.params.update(vars(self.cfg))
-        self._predictor = None    # type: ignore[var-annotated]
+        self._pipeline = None    # type: ignore[var-annotated]
         self._device = None
 
-    # ------------------------------------------------------------------
-    def _ensure_predictor(self):
-        if self._predictor is not None:
-            return self._predictor
+    def _ensure_pipeline(self):
+        if self._pipeline is not None:
+            return self._pipeline
         try:
-            from uni2ts.model.moirai import MoiraiForecast, MoiraiModule
+            from chronos import ChronosPipeline
         except ImportError as e:
             raise RuntimeError(
-                "uni2ts not installed. Run: pip install 'uni2ts[notebook]'"
+                "chronos-forecasting not installed. "
+                "Run: pip install chronos-forecasting"
             ) from e
         import torch
 
@@ -79,71 +88,48 @@ class FinCastRegressor(ModelBase):
         if device == "auto":
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self._device = device
-        logger.info("Loading MOIRAI %s on %s", self.cfg.pretrained, device)
-
-        module = MoiraiModule.from_pretrained(self.cfg.pretrained)
-        model = MoiraiForecast(
-            module=module,
-            prediction_length=self.cfg.horizon,
-            context_length=self.cfg.context_length,
-            patch_size=self.cfg.patch_size,
-            num_samples=self.cfg.num_samples,
-            target_dim=1,
-            feat_dynamic_real_dim=0,
-            past_feat_dynamic_real_dim=0,
+        logger.info("Loading Chronos-T5 %s on %s", self.cfg.pretrained, device)
+        self._pipeline = ChronosPipeline.from_pretrained(
+            self.cfg.pretrained,
+            device_map=device,
+            torch_dtype=torch.bfloat16 if device == "cuda" else torch.float32,
         )
-        self._predictor = model.create_predictor(batch_size=self.cfg.batch_size).to(device)
-        return self._predictor
+        return self._pipeline
 
-    # ------------------------------------------------------------------
     def fit(self, X_train, y_train, X_val=None, y_val=None) -> "FinCastRegressor":
-        """Zero-shot — load the predictor lazily and return."""
-        self._ensure_predictor()
+        self._ensure_pipeline()
         return self
 
-    # ------------------------------------------------------------------
     def predict(self, X) -> np.ndarray:
-        """Per-row 24h log-return forecasts using MOIRAI medians."""
         if not isinstance(X, pd.DataFrame) or "close" not in X.columns:
             raise ValueError("FinCastRegressor expects a DataFrame with a 'close' column.")
         import torch
-        from gluonts.dataset.pandas import PandasDataset
 
-        predictor = self._ensure_predictor()
+        pipeline = self._ensure_pipeline()
         cfg = self.cfg
-        close = X["close"].astype("float64")
-        n = len(close)
+        close = X["close"].to_numpy(dtype="float64")
+        n = len(X)
         preds = np.full(n, np.nan, dtype="float64")
 
-        # For efficiency, batch the rows: build a list of mini-series, each
-        # containing ``context_length`` closes ending at row i.
-        rows = []
-        for i in range(n):
-            start = max(0, i - cfg.context_length + 1)
-            end = i + 1
-            sub = close.iloc[start:end].copy()
-            sub.index = pd.date_range(
-                end=close.index[i] if hasattr(close.index, "to_pydatetime") else f"2020-01-01 {i:04d}:00",
-                periods=len(sub), freq="h",
+        starts = np.maximum(0, np.arange(n) - cfg.context_length + 1)
+        ends = np.arange(n) + 1
+        contexts = [close[s:e].astype("float32") for s, e in zip(starts, ends)]
+
+        for chunk_start in range(0, n, cfg.batch_size):
+            chunk_end = min(chunk_start + cfg.batch_size, n)
+            chunk_contexts = [torch.tensor(c) for c in contexts[chunk_start:chunk_end]]
+            fc = pipeline.predict(
+                context=chunk_contexts,
+                prediction_length=cfg.horizon,
+                num_samples=cfg.num_samples,
             )
-            rows.append((str(i), sub))
-
-        # GluonTS PandasDataset expects a dict-of-Series
-        dataset_dict = {item_id: s.rename("target").to_frame() for item_id, s in rows}
-        ds = PandasDataset(dataset_dict, target="target", freq="h")
-        forecasts = list(predictor.predict(ds))
-
-        # Each forecast has shape [num_samples, prediction_length].
-        for fc in forecasts:
-            i = int(fc.item_id)
-            samples = fc.samples
-            median_path = np.median(samples, axis=0)        # [horizon]
-            p_tph = median_path[-1]
-            p_t = close.iloc[i]
-            preds[i] = float(np.log(max(p_tph, 1e-12) / max(p_t, 1e-12)))
+            fc_np = fc.numpy() if hasattr(fc, "numpy") else np.asarray(fc)
+            median_path = np.median(fc_np, axis=1)
+            p_tph = median_path[:, -1]
+            p_t = close[chunk_start:chunk_end]
+            preds[chunk_start:chunk_end] = np.log(np.clip(p_tph, 1e-12, None) / p_t)
         return preds
 
-    # ------------------------------------------------------------------
     def save(self, path: str | Path) -> Path:
         p = Path(path); p.parent.mkdir(parents=True, exist_ok=True)
         with p.with_suffix(".json").open("w") as f:

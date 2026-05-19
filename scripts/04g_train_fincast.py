@@ -81,10 +81,10 @@ def _make_visualisations(test_df: pd.DataFrame, y_pred: np.ndarray, target_col: 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", default="Salesforce/moirai-1.0-R-base")
+    parser.add_argument("--model", default="amazon/chronos-t5-large")
     parser.add_argument("--context", type=int, default=512)
     parser.add_argument("--num-samples", type=int, default=20)
-    parser.add_argument("--batch-size", type=int, default=16)
+    parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--device", default="auto")
     args = parser.parse_args()
 
@@ -127,8 +127,8 @@ def main() -> None:
     summary = {
         "regression_zero_shot": {
             "model_id": args.model,
-            "model_family": "MOIRAI",
-            "note": "MOIRAI from Salesforce stands in for the FinCast role.",
+            "model_family": "Chronos-T5",
+            "note": "MOIRAI was the intended FinCast stand-in but uni2ts dependency conflicts on Colab made it impractical. We use Chronos-T5-Large as a second TSFM benchmark — different architecture and 3.5x larger than the Chronos-Bolt-base evaluated in the Chronos slot.",
             "context_length": args.context,
             "metrics": metrics_all,
             "figures": {k: str(v.relative_to(PROJECT_ROOT)) for k, v in figures.items()},
