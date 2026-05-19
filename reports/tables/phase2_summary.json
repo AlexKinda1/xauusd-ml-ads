@@ -66,14 +66,14 @@
     "is_session_us"
   ],
   "top_nan_rates": {
+    "google_trends_z168": 0.7079,
+    "cpi_yoy_z168": 0.6664,
     "fear_greed_z168": 0.5314,
     "fear_greed_ma24": 0.53,
     "fear_greed_level": 0.5298,
-    "google_trends_z168": 0.501,
-    "fed_funds_z168": 0.0715,
-    "cpi_yoy_z168": 0.0097,
-    "zscore_24": 0.0,
-    "zscore_168": 0.0
+    "fed_funds_z168": 0.3892,
+    "brent_oil_z168": 0.0013,
+    "zscore_24": 0.0
   },
   "y_clf_class_balance": {
     "0.0": 40318,
