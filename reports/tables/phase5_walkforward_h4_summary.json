@@ -1,0 +1,209 @@
+{
+  "horizon": 4,
+  "fold_size": 720,
+  "n_features": 62,
+  "initial_train_cutoff": "2023-09-05 00:00:00+00:00",
+  "variants": {
+    "sliding_24m": {
+      "train_window": 12096,
+      "models": {
+        "xgboost": {
+          "n_folds": 21,
+          "n_predictions": 15120,
+          "metrics": {
+            "mse": 2.6977391639999852e-05,
+            "rmse": 0.0051939764766506065,
+            "mae": 0.003451323759986847,
+            "mape": 2.7301284750780828,
+            "r2": -0.10855353988367655,
+            "directional_accuracy": 0.4916005291005291,
+            "pearson": 0.010095453621188851,
+            "spearman": -0.007185948996856553,
+            "bias": -0.0006078893577787585
+          },
+          "sharpe": {
+            "mean": -6.42975174852366e-05,
+            "std": 0.004938375928520561,
+            "sharpe_annual": -0.5062743838110326,
+            "win_rate": 0.49179568611883023,
+            "n_trades": 15120
+          },
+          "figures": {
+            "pred_vs_actual_scatter": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_scatter.png",
+            "pred_vs_actual_ts": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_ts.png",
+            "returns_scatter": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_returns.png",
+            "residuals_histogram": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_residuals_hist.png",
+            "residuals_over_time": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_residuals_ts.png",
+            "monthly_dir_acc": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_monthly_diracc.png"
+          }
+        },
+        "chronos": {
+          "model_id": "amazon/chronos-bolt-base",
+          "context_length": 512,
+          "n_folds": 21,
+          "n_predictions": 15120,
+          "metrics": {
+            "mse": 2.9843939027832816e-05,
+            "rmse": 0.005462960646740265,
+            "mae": 0.0036620664979030576,
+            "mape": 4.375272134623361,
+            "r2": -0.22634555241148813,
+            "directional_accuracy": 0.5083994708994709,
+            "pearson": -0.006874163991130482,
+            "spearman": 0.005180581625892503,
+            "bias": 0.0002689350929042646
+          },
+          "sharpe": {
+            "mean": 5.524803856999497e-05,
+            "std": 0.00493848545977208,
+            "sharpe_annual": 0.4350097393029055,
+            "win_rate": 0.5086012968109038,
+            "n_trades": 15120
+          },
+          "figures": {
+            "pred_vs_actual_scatter": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_scatter.png",
+            "pred_vs_actual_ts": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_ts.png",
+            "returns_scatter": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_returns.png",
+            "residuals_histogram": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_residuals_hist.png",
+            "residuals_over_time": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_residuals_ts.png",
+            "monthly_dir_acc": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_monthly_diracc.png"
+          }
+        }
+      }
+    },
+    "sliding_6m": {
+      "train_window": 3024,
+      "models": {
+        "xgboost": {
+          "n_folds": 21,
+          "n_predictions": 15120,
+          "metrics": {
+            "mse": 2.780718458575542e-05,
+            "rmse": 0.005273251803750265,
+            "mae": 0.003539582358108973,
+            "mape": 3.15282739292754,
+            "r2": -0.14265134739831908,
+            "directional_accuracy": 0.48802910052910053,
+            "pearson": -0.006594348885058679,
+            "spearman": -0.01794999443682875,
+            "bias": -0.0005797878418672276
+          },
+          "sharpe": {
+            "mean": -9.733403232141956e-05,
+            "std": 0.0049378352613567555,
+            "sharpe_annual": -0.7664856252400543,
+            "win_rate": 0.48822283975122405,
+            "n_trades": 15120
+          },
+          "figures": {
+            "pred_vs_actual_scatter": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_scatter.png",
+            "pred_vs_actual_ts": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_ts.png",
+            "returns_scatter": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_returns.png",
+            "residuals_histogram": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_residuals_hist.png",
+            "residuals_over_time": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_residuals_ts.png",
+            "monthly_dir_acc": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_monthly_diracc.png"
+          }
+        },
+        "chronos": {
+          "model_id": "amazon/chronos-bolt-base",
+          "context_length": 512,
+          "n_folds": 21,
+          "n_predictions": 15120,
+          "metrics": {
+            "mse": 2.9843939027832816e-05,
+            "rmse": 0.005462960646740265,
+            "mae": 0.0036620664979030576,
+            "mape": 4.375272134623361,
+            "r2": -0.22634555241148813,
+            "directional_accuracy": 0.5083994708994709,
+            "pearson": -0.006874163991130482,
+            "spearman": 0.005180581625892503,
+            "bias": 0.0002689350929042646
+          },
+          "sharpe": {
+            "mean": 5.524803856999497e-05,
+            "std": 0.00493848545977208,
+            "sharpe_annual": 0.4350097393029055,
+            "win_rate": 0.5086012968109038,
+            "n_trades": 15120
+          },
+          "figures": {
+            "pred_vs_actual_scatter": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_scatter.png",
+            "pred_vs_actual_ts": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_ts.png",
+            "returns_scatter": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_returns.png",
+            "residuals_histogram": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_residuals_hist.png",
+            "residuals_over_time": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_residuals_ts.png",
+            "monthly_dir_acc": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_monthly_diracc.png"
+          }
+        }
+      }
+    },
+    "expanding": {
+      "train_window": null,
+      "models": {
+        "xgboost": {
+          "n_folds": 21,
+          "n_predictions": 15120,
+          "metrics": {
+            "mse": 2.546495506833654e-05,
+            "rmse": 0.00504628131086016,
+            "mae": 0.003287211423147618,
+            "mape": 1.9771025718923845,
+            "r2": -0.046404576865289426,
+            "directional_accuracy": 0.5002645502645503,
+            "pearson": 0.017493693905571883,
+            "spearman": -0.0033867993973308312,
+            "bias": -0.0002995529744799297
+          },
+          "sharpe": {
+            "mean": 2.1063127039103105e-05,
+            "std": 0.004938749571179472,
+            "sharpe_annual": 0.16583711646523172,
+            "win_rate": 0.5004631467513564,
+            "n_trades": 15120
+          },
+          "figures": {
+            "pred_vs_actual_scatter": "reports/figures/walkforward/xgboost_wf_expanding_h4_scatter.png",
+            "pred_vs_actual_ts": "reports/figures/walkforward/xgboost_wf_expanding_h4_ts.png",
+            "returns_scatter": "reports/figures/walkforward/xgboost_wf_expanding_h4_returns.png",
+            "residuals_histogram": "reports/figures/walkforward/xgboost_wf_expanding_h4_residuals_hist.png",
+            "residuals_over_time": "reports/figures/walkforward/xgboost_wf_expanding_h4_residuals_ts.png",
+            "monthly_dir_acc": "reports/figures/walkforward/xgboost_wf_expanding_h4_monthly_diracc.png"
+          }
+        },
+        "chronos": {
+          "model_id": "amazon/chronos-bolt-base",
+          "context_length": 512,
+          "n_folds": 21,
+          "n_predictions": 15120,
+          "metrics": {
+            "mse": 2.9843939027832816e-05,
+            "rmse": 0.005462960646740265,
+            "mae": 0.0036620664979030576,
+            "mape": 4.375272134623361,
+            "r2": -0.22634555241148813,
+            "directional_accuracy": 0.5083994708994709,
+            "pearson": -0.006874163991130482,
+            "spearman": 0.005180581625892503,
+            "bias": 0.0002689350929042646
+          },
+          "sharpe": {
+            "mean": 5.524803856999497e-05,
+            "std": 0.00493848545977208,
+            "sharpe_annual": 0.4350097393029055,
+            "win_rate": 0.5086012968109038,
+            "n_trades": 15120
+          },
+          "figures": {
+            "pred_vs_actual_scatter": "reports/figures/walkforward/chronos_wf_expanding_h4_scatter.png",
+            "pred_vs_actual_ts": "reports/figures/walkforward/chronos_wf_expanding_h4_ts.png",
+            "returns_scatter": "reports/figures/walkforward/chronos_wf_expanding_h4_returns.png",
+            "residuals_histogram": "reports/figures/walkforward/chronos_wf_expanding_h4_residuals_hist.png",
+            "residuals_over_time": "reports/figures/walkforward/chronos_wf_expanding_h4_residuals_ts.png",
+            "monthly_dir_acc": "reports/figures/walkforward/chronos_wf_expanding_h4_monthly_diracc.png"
+          }
+        }
+      }
+    }
+  }
+}
