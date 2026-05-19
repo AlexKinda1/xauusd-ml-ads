@@ -118,11 +118,16 @@ class FinCastRegressor(ModelBase):
         for chunk_start in range(0, n, cfg.batch_size):
             chunk_end = min(chunk_start + cfg.batch_size, n)
             chunk_contexts = [torch.tensor(c) for c in contexts[chunk_start:chunk_end]]
-            fc = pipeline.predict(
-                context=chunk_contexts,
-                prediction_length=cfg.horizon,
-                num_samples=cfg.num_samples,
-            )
+            # ChronosPipeline.predict expects `context` positionally and supports
+            # num_samples; ChronosBoltPipeline.predict does not take num_samples.
+            try:
+                fc = pipeline.predict(
+                    chunk_contexts,
+                    prediction_length=cfg.horizon,
+                    num_samples=cfg.num_samples,
+                )
+            except TypeError:
+                fc = pipeline.predict(chunk_contexts, prediction_length=cfg.horizon)
             fc_np = fc.numpy() if hasattr(fc, "numpy") else np.asarray(fc)
             median_path = np.median(fc_np, axis=1)
             p_tph = median_path[:, -1]

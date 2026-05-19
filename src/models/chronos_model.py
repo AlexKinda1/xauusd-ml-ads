@@ -155,15 +155,16 @@ class ChronosRegressor(ModelBase):
             chunk_contexts = [torch.tensor(c) for c in contexts[chunk_start:chunk_end]]
             # forecast: returns [B, num_samples, prediction_length] for Chronos
             #          or [B, num_quantiles, prediction_length] for Chronos-Bolt
+            # ChronosPipeline.predict expects context positionally and supports
+            # num_samples; ChronosBoltPipeline.predict does not take num_samples.
             try:
                 fc = pipeline.predict(
-                    context=chunk_contexts,
+                    chunk_contexts,
                     prediction_length=cfg.horizon,
                     num_samples=cfg.num_samples,
                 )
             except TypeError:
-                # Chronos-Bolt ignores num_samples — fall back without it
-                fc = pipeline.predict(context=chunk_contexts, prediction_length=cfg.horizon)
+                fc = pipeline.predict(chunk_contexts, prediction_length=cfg.horizon)
             fc_np = fc.numpy() if hasattr(fc, "numpy") else np.asarray(fc)
             # Take median over the sample / quantile axis (axis=1).
             median_path = np.median(fc_np, axis=1)              # [B, horizon]
