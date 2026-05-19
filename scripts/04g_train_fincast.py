@@ -1,23 +1,17 @@
-"""Phase-4 step 7/7 — FinCast role via Salesforce MOIRAI.
+"""Phase-4 step 7/7 — FinCast (MOIRAI) regression, MLflow-free variant.
 
-Same orchestration as 04f_train_chronos.py but for MOIRAI. Runs on a
-Colab GPU because the sandbox cannot reach HuggingFace Hub.
-
-Usage::
-
-    python scripts/04g_train_fincast.py \
-        --model Salesforce/moirai-1.0-R-base \
-        --context 512 --batch-size 16 --device cuda
+Same outputs as 04g_train_fincast.py but without the MLflow dependency
+(uni2ts has historically pinned a narrow mlflow range that conflicts
+with the rest of the stack). Predictions and figures are still saved,
+and a JSON summary is written to ``reports/tables/``.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import tempfile
 from pathlib import Path
 
-import mlflow
 import numpy as np
 import pandas as pd
 
@@ -114,48 +108,32 @@ def main() -> None:
         device=args.device,
     )
     model = FinCastRegressor(cfg=fincast_cfg)
+    model.fit(train_df, train_df[target_reg].values)
 
-    mlflow.set_tracking_uri(f"file://{PROJECT_ROOT / 'mlruns'}")
-    mlflow.set_experiment("xauusd-ml-ads")
+    metrics_all: dict[str, dict[str, float]] = {}
+    for name, df in [("train", train_df), ("val", val_df), ("test", test_df)]:
+        logger.info("Predicting on %s (%d rows)...", name, len(df))
+        y_pred = model.predict(df)
+        y_true = df[target_reg].values
+        m = regression_metrics(np.asarray(y_true, dtype="float64"),
+                               np.asarray(y_pred, dtype="float64"))
+        metrics_all[name] = m
+        _save_predictions(name, df.index, y_true, y_pred)
+        logger.info("%s: %s", name, " | ".join(f"{k}={v:.4f}" for k, v in m.items()))
 
-    with mlflow.start_run(run_name="fincast_regression_zero_shot") as run:
-        mlflow.log_params({"model_name": model.name, "task": model.task, **vars(fincast_cfg)})
+    y_pred_te = model.predict(test_df)
+    figures = _make_visualisations(test_df, y_pred_te, target_reg)
 
-        model.fit(train_df, train_df[target_reg].values)
-
-        metrics_all: dict[str, dict[str, float]] = {}
-        for name, df in [("train", train_df), ("val", val_df), ("test", test_df)]:
-            logger.info("Predicting on %s (%d rows)...", name, len(df))
-            y_pred = model.predict(df)
-            y_true = df[target_reg].values
-            m = regression_metrics(np.asarray(y_true, dtype="float64"),
-                                   np.asarray(y_pred, dtype="float64"))
-            metrics_all[name] = m
-            for k, v in m.items():
-                mlflow.log_metric(f"{name}_{k}", v)
-            pred_path = _save_predictions(name, df.index, y_true, y_pred)
-            mlflow.log_artifact(str(pred_path), artifact_path="predictions")
-
-        y_pred_te = model.predict(test_df)
-        figures = _make_visualisations(test_df, y_pred_te, target_reg)
-        for p in figures.values():
-            mlflow.log_artifact(str(p), artifact_path="figures")
-
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump({k: str(v) for k, v in vars(fincast_cfg).items()}, f); tmp = Path(f.name)
-        mlflow.log_artifact(str(tmp), artifact_path="config"); tmp.unlink()
-
-        summary = {
-            "regression_zero_shot": {
-                "model_id": args.model,
-                "model_family": "MOIRAI",
-                "note": "MOIRAI from Salesforce stands in for the 'FinCast' role: no public FinCast checkpoint at our cutoff. MOIRAI was pretrained on LOTSA including a substantial share of financial time series.",
-                "context_length": args.context,
-                "metrics": metrics_all,
-                "figures": {k: str(v.relative_to(PROJECT_ROOT)) for k, v in figures.items()},
-                "mlflow_run_id": run.info.run_id,
-            }
+    summary = {
+        "regression_zero_shot": {
+            "model_id": args.model,
+            "model_family": "MOIRAI",
+            "note": "MOIRAI from Salesforce stands in for the FinCast role.",
+            "context_length": args.context,
+            "metrics": metrics_all,
+            "figures": {k: str(v.relative_to(PROJECT_ROOT)) for k, v in figures.items()},
         }
+    }
     out = PROJECT_ROOT / "reports/tables/phase4_fincast_summary.json"
     out.write_text(json.dumps(summary, indent=2, default=float))
     logger.info("FinCast phase complete — summary at %s", out)
