@@ -65,6 +65,10 @@ data/interim/*
 !data/interim/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+# Walk-forward prediction arrays are small and needed for the Phase-5
+# statistical tests (Diebold-Mariano, bootstrap Sharpe) in the sandbox.
+!data/processed/predictions/
+!data/processed/predictions/*_walkforward_*.parquet
 data/external/*
 !data/external/.gitkeep
 # Macro + sentiment data, intentionally tracked.

@@ -57,11 +57,11 @@ train-all:  ## Phase 4: train all 7 models on both tasks
 mlflow-ui:  ## Open MLflow tracking UI on http://localhost:5000
 	$(POETRY) run mlflow ui --backend-store-uri ./mlruns
 
-evaluate:  ## Phase 5: evaluate and compare all models
-	$(POETRY) run python scripts/04_evaluate_all.py
+walk-forward:  ## Phase 5: walk-forward h=4 (XGBoost + Chronos; add --include-moirai)
+	$(POETRY) run python scripts/05_walk_forward.py --variants sliding_24m sliding_6m expanding
 
-report:  ## Phase 5: generate final figures and tables
-	$(POETRY) run python scripts/05_generate_report.py
+report:  ## Phase 5: master comparison table + statistical tests + RESULTS.md
+	$(POETRY) run python scripts/06_final_report.py
 
 # ---------- Cleanup ----------
 clean:  ## Remove caches and build artefacts (preserves data/ and mlruns/)
