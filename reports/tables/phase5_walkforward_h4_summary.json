@@ -7,66 +7,36 @@
     "sliding_24m": {
       "train_window": 12096,
       "models": {
-        "xgboost": {
-          "n_folds": 21,
-          "n_predictions": 15120,
-          "metrics": {
-            "mse": 2.6977391639999852e-05,
-            "rmse": 0.0051939764766506065,
-            "mae": 0.003451323759986847,
-            "mape": 2.7301284750780828,
-            "r2": -0.10855353988367655,
-            "directional_accuracy": 0.4916005291005291,
-            "pearson": 0.010095453621188837,
-            "spearman": -0.007185948996856553,
-            "bias": -0.0006078893577787585
-          },
-          "sharpe": {
-            "mean": -6.42975174852366e-05,
-            "std": 0.004938375928520561,
-            "sharpe_annual": -0.5062743838110326,
-            "win_rate": 0.49179568611883023,
-            "n_trades": 15120
-          },
-          "figures": {
-            "pred_vs_actual_scatter": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_scatter.png",
-            "pred_vs_actual_ts": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_ts.png",
-            "returns_scatter": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_returns.png",
-            "residuals_histogram": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_residuals_hist.png",
-            "residuals_over_time": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_residuals_ts.png",
-            "monthly_dir_acc": "reports/figures/walkforward/xgboost_wf_sliding_24m_h4_monthly_diracc.png"
-          }
-        },
-        "chronos": {
-          "model_id": "amazon/chronos-t5-large",
+        "moirai": {
+          "model_id": "Salesforce/moirai-1.1-R-large",
           "context_length": 512,
           "n_folds": 21,
           "n_predictions": 15120,
           "metrics": {
-            "mse": 3.057528377356214e-05,
-            "rmse": 0.005529492180441359,
-            "mae": 0.0037794635505777156,
-            "mape": 4.833039187270482,
-            "r2": -0.25639793173608805,
-            "directional_accuracy": 0.5085978835978836,
-            "pearson": -0.0015820995846663362,
-            "spearman": 0.018236305448316385,
-            "bias": -9.907249253208622e-05
+            "mse": 2.695788046002875e-05,
+            "rmse": 0.005192097886214084,
+            "mae": 0.0034115787972709877,
+            "mape": 2.777328144803952,
+            "r2": -0.10775178751587688,
+            "directional_accuracy": 0.5046296296296297,
+            "pearson": 0.025140853572332693,
+            "spearman": 0.011248725349953031,
+            "bias": -0.000140092476263686
           },
           "sharpe": {
-            "mean": 7.79141119959981e-05,
-            "std": 0.004938179864413401,
-            "sharpe_annual": 0.613514902806507,
-            "win_rate": 0.5087997882757708,
+            "mean": 7.747209934379116e-05,
+            "std": 0.004938186818658188,
+            "sharpe_annual": 0.6100335272590955,
+            "win_rate": 0.5048299589784306,
             "n_trades": 15120
           },
           "figures": {
-            "pred_vs_actual_scatter": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_scatter.png",
-            "pred_vs_actual_ts": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_ts.png",
-            "returns_scatter": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_returns.png",
-            "residuals_histogram": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_residuals_hist.png",
-            "residuals_over_time": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_residuals_ts.png",
-            "monthly_dir_acc": "reports/figures/walkforward/chronos_wf_sliding_24m_h4_monthly_diracc.png"
+            "pred_vs_actual_scatter": "reports/figures/walkforward/moirai_wf_sliding_24m_h4_scatter.png",
+            "pred_vs_actual_ts": "reports/figures/walkforward/moirai_wf_sliding_24m_h4_ts.png",
+            "returns_scatter": "reports/figures/walkforward/moirai_wf_sliding_24m_h4_returns.png",
+            "residuals_histogram": "reports/figures/walkforward/moirai_wf_sliding_24m_h4_residuals_hist.png",
+            "residuals_over_time": "reports/figures/walkforward/moirai_wf_sliding_24m_h4_residuals_ts.png",
+            "monthly_dir_acc": "reports/figures/walkforward/moirai_wf_sliding_24m_h4_monthly_diracc.png"
           }
         }
       }
@@ -74,66 +44,36 @@
     "sliding_6m": {
       "train_window": 3024,
       "models": {
-        "xgboost": {
-          "n_folds": 21,
-          "n_predictions": 15120,
-          "metrics": {
-            "mse": 2.780718458575542e-05,
-            "rmse": 0.005273251803750265,
-            "mae": 0.003539582358108973,
-            "mape": 3.15282739292754,
-            "r2": -0.14265134739831908,
-            "directional_accuracy": 0.48802910052910053,
-            "pearson": -0.006594348885058675,
-            "spearman": -0.01794999443682875,
-            "bias": -0.0005797878418672276
-          },
-          "sharpe": {
-            "mean": -9.733403232141956e-05,
-            "std": 0.0049378352613567555,
-            "sharpe_annual": -0.7664856252400543,
-            "win_rate": 0.48822283975122405,
-            "n_trades": 15120
-          },
-          "figures": {
-            "pred_vs_actual_scatter": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_scatter.png",
-            "pred_vs_actual_ts": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_ts.png",
-            "returns_scatter": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_returns.png",
-            "residuals_histogram": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_residuals_hist.png",
-            "residuals_over_time": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_residuals_ts.png",
-            "monthly_dir_acc": "reports/figures/walkforward/xgboost_wf_sliding_6m_h4_monthly_diracc.png"
-          }
-        },
-        "chronos": {
-          "model_id": "amazon/chronos-t5-large",
+        "moirai": {
+          "model_id": "Salesforce/moirai-1.1-R-large",
           "context_length": 512,
           "n_folds": 21,
           "n_predictions": 15120,
           "metrics": {
-            "mse": 3.036910274207467e-05,
-            "rmse": 0.005510816885188136,
-            "mae": 0.003774118304469741,
-            "mape": 4.442670710815795,
-            "r2": -0.24792555177577325,
-            "directional_accuracy": 0.504563492063492,
-            "pearson": 0.005890717681919973,
-            "spearman": 0.010339405240835976,
-            "bias": -0.00010680440648875371
+            "mse": 2.653712310288721e-05,
+            "rmse": 0.005151419523091398,
+            "mae": 0.003406851171650825,
+            "mape": 2.593736039585165,
+            "r2": -0.09046204861466456,
+            "directional_accuracy": 0.5061507936507936,
+            "pearson": 0.047593346388737745,
+            "spearman": 0.016548338211012526,
+            "bias": -0.00012771148319355618
           },
           "sharpe": {
-            "mean": 5.701007498807321e-05,
-            "std": 0.004938465433056704,
-            "sharpe_annual": 0.4488854096918991,
-            "win_rate": 0.5047637951568082,
+            "mean": 9.628078509221614e-05,
+            "std": 0.004937855910470478,
+            "sharpe_annual": 0.758188347819571,
+            "win_rate": 0.5063517268757444,
             "n_trades": 15120
           },
           "figures": {
-            "pred_vs_actual_scatter": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_scatter.png",
-            "pred_vs_actual_ts": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_ts.png",
-            "returns_scatter": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_returns.png",
-            "residuals_histogram": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_residuals_hist.png",
-            "residuals_over_time": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_residuals_ts.png",
-            "monthly_dir_acc": "reports/figures/walkforward/chronos_wf_sliding_6m_h4_monthly_diracc.png"
+            "pred_vs_actual_scatter": "reports/figures/walkforward/moirai_wf_sliding_6m_h4_scatter.png",
+            "pred_vs_actual_ts": "reports/figures/walkforward/moirai_wf_sliding_6m_h4_ts.png",
+            "returns_scatter": "reports/figures/walkforward/moirai_wf_sliding_6m_h4_returns.png",
+            "residuals_histogram": "reports/figures/walkforward/moirai_wf_sliding_6m_h4_residuals_hist.png",
+            "residuals_over_time": "reports/figures/walkforward/moirai_wf_sliding_6m_h4_residuals_ts.png",
+            "monthly_dir_acc": "reports/figures/walkforward/moirai_wf_sliding_6m_h4_monthly_diracc.png"
           }
         }
       }
@@ -141,66 +81,36 @@
     "expanding": {
       "train_window": null,
       "models": {
-        "xgboost": {
-          "n_folds": 21,
-          "n_predictions": 15120,
-          "metrics": {
-            "mse": 2.546495506833654e-05,
-            "rmse": 0.00504628131086016,
-            "mae": 0.003287211423147618,
-            "mape": 1.9771025718923845,
-            "r2": -0.046404576865289426,
-            "directional_accuracy": 0.5002645502645503,
-            "pearson": 0.017493693905571886,
-            "spearman": -0.0033867993973308312,
-            "bias": -0.0002995529744799297
-          },
-          "sharpe": {
-            "mean": 2.1063127039103105e-05,
-            "std": 0.004938749571179472,
-            "sharpe_annual": 0.16583711646523172,
-            "win_rate": 0.5004631467513564,
-            "n_trades": 15120
-          },
-          "figures": {
-            "pred_vs_actual_scatter": "reports/figures/walkforward/xgboost_wf_expanding_h4_scatter.png",
-            "pred_vs_actual_ts": "reports/figures/walkforward/xgboost_wf_expanding_h4_ts.png",
-            "returns_scatter": "reports/figures/walkforward/xgboost_wf_expanding_h4_returns.png",
-            "residuals_histogram": "reports/figures/walkforward/xgboost_wf_expanding_h4_residuals_hist.png",
-            "residuals_over_time": "reports/figures/walkforward/xgboost_wf_expanding_h4_residuals_ts.png",
-            "monthly_dir_acc": "reports/figures/walkforward/xgboost_wf_expanding_h4_monthly_diracc.png"
-          }
-        },
-        "chronos": {
-          "model_id": "amazon/chronos-t5-large",
+        "moirai": {
+          "model_id": "Salesforce/moirai-1.1-R-large",
           "context_length": 512,
           "n_folds": 21,
           "n_predictions": 15120,
           "metrics": {
-            "mse": 3.072147832431368e-05,
-            "rmse": 0.005542695943700474,
-            "mae": 0.003784263945296716,
-            "mape": 4.762960549851986,
-            "r2": -0.26240535042615276,
-            "directional_accuracy": 0.5054232804232804,
-            "pearson": -0.006517307968386978,
-            "spearman": 0.014803879038388082,
-            "bias": -9.166270703480582e-05
+            "mse": 2.7343072131419153e-05,
+            "rmse": 0.00522906034880256,
+            "mae": 0.0034289956216749843,
+            "mape": 2.6642071072338793,
+            "r2": -0.12358006315318537,
+            "directional_accuracy": 0.5046296296296297,
+            "pearson": -0.00435161201188974,
+            "spearman": -0.003840304787881777,
+            "bias": -0.00015204027371867944
           },
           "sharpe": {
-            "mean": 5.569779056727284e-05,
-            "std": 0.0049384804078048145,
-            "sharpe_annual": 0.43855142675498365,
-            "win_rate": 0.5056239248378986,
+            "mean": -1.2246118806002485e-05,
+            "std": 0.004938779304111534,
+            "sharpe_annual": -0.09641725089136223,
+            "win_rate": 0.5048299589784306,
             "n_trades": 15120
           },
           "figures": {
-            "pred_vs_actual_scatter": "reports/figures/walkforward/chronos_wf_expanding_h4_scatter.png",
-            "pred_vs_actual_ts": "reports/figures/walkforward/chronos_wf_expanding_h4_ts.png",
-            "returns_scatter": "reports/figures/walkforward/chronos_wf_expanding_h4_returns.png",
-            "residuals_histogram": "reports/figures/walkforward/chronos_wf_expanding_h4_residuals_hist.png",
-            "residuals_over_time": "reports/figures/walkforward/chronos_wf_expanding_h4_residuals_ts.png",
-            "monthly_dir_acc": "reports/figures/walkforward/chronos_wf_expanding_h4_monthly_diracc.png"
+            "pred_vs_actual_scatter": "reports/figures/walkforward/moirai_wf_expanding_h4_scatter.png",
+            "pred_vs_actual_ts": "reports/figures/walkforward/moirai_wf_expanding_h4_ts.png",
+            "returns_scatter": "reports/figures/walkforward/moirai_wf_expanding_h4_returns.png",
+            "residuals_histogram": "reports/figures/walkforward/moirai_wf_expanding_h4_residuals_hist.png",
+            "residuals_over_time": "reports/figures/walkforward/moirai_wf_expanding_h4_residuals_ts.png",
+            "monthly_dir_acc": "reports/figures/walkforward/moirai_wf_expanding_h4_monthly_diracc.png"
           }
         }
       }
